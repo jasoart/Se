@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-Hant"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">
-<title>學測英文智能罰寫組卷系統 v4</title>
+<title>學測英文智能罰寫組卷系統 v5</title>
 <style>
 :root{--ink:#17243b;--mut:#63728a;--line:#e0e7f0;--pri:#2959c8;--bg:#f1f5fb}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px system-ui,"Microsoft JhengHei",sans-serif}
@@ -56,7 +56,7 @@ dialog{border:1px solid var(--line);border-radius:15px;padding:20px;width:min(95
 .pw{display:block!important;width:210mm!important;height:297mm!important;break-after:page}.pw:last-child{break-after:auto}
 .paper{transform:none!important;box-shadow:none!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 </style></head><body>
-<header class="top"><div><b>學測英文 · 智能罰寫組卷 v4</b><small>12,544 句原創句庫｜策略式智慧組卷｜練習紀錄｜A4 即時分頁</small></div>
+<header class="top"><div><b>學測英文 · 智能罰寫組卷 v5</b><small>23,353 句原創句庫｜111–115年學測考點｜新增12種句型｜A4 智慧組卷</small></div>
 <div class="acts"><button id="exp">備份</button><button id="imp">匯入</button><button class="ok" id="pr1">列印／存 PDF</button></div></header>
 <main class="ws"><aside class="side">
 <section class="panel"><h2>組卷統計</h2><div class="stats">
@@ -72,7 +72,7 @@ dialog{border:1px solid var(--line);border-radius:15px;padding:20px;width:min(95
 <p class="hint">依策略排序 → 主題／句型限量並避免重複詞組 → 背包 DP 湊近目標詞數 → 由易到難排列，再依實際版面修正頁數。列印後自動累計各句練習次數。</p></section>
 <section class="panel"><h2>句庫搜尋</h2>
 <div class="f"><label for="q">搜尋（英文／中文／句型／主題）</label><input id="q" placeholder="例如 broaden / 閱讀 / only by"></div>
-<div class="two"><div class="f"><label for="fLv">難度</label><select id="fLv"><option value="">全部</option><option value="2">L2 中階</option><option value="3">L3 進階</option></select></div>
+<div class="two"><div class="f"><label for="fLv">難度</label><select id="fLv"><option value="">全部</option><option value="2">L2 中階</option><option value="3">L3 進階</option></select></div><div class="f"><label for="fYear">歷屆年份</label><select id="fYear"><option value="">全部年份</option><option value="111">111學測</option><option value="112">112學測</option><option value="113">113學測</option><option value="114">114學測</option><option value="115">115學測</option></select></div>
 <div class="f"><label for="fTp">主題</label><select id="fTp"><option value="">全部</option></select></div>
 <div class="f" style="grid-column:1/3"><label for="fKy">句型</label><select id="fKy"><option value="">全部</option></select></div></div>
 <div class="tb"><button id="addAll">加入目前篩選</button><button id="newB">＋ 新增例句</button></div>
@@ -85,7 +85,7 @@ dialog{border:1px solid var(--line);border-radius:15px;padding:20px;width:min(95
 <div class="f"><label for="lineMm">行高 mm</label><input id="lineMm" type="number" min="6" max="14" step=".5"></div>
 <div class="f"><label for="gridMm">字寬 mm</label><input id="gridMm" type="number" min="3" max="9" step=".5"></div></div>
 <div class="ck"><input type="checkbox" id="showZh"><label for="showZh">印出中文</label></div><div class="ck"><input type="checkbox" id="showKey"><label for="showKey">印出句型標籤</label></div>
-<p class="hint">句庫為原創句型練習句，與歷屆試題原文無關。個人資料僅存於本瀏覽器，請定期「備份」。可「匯入」舊版備份 JSON 以合併舊句庫。</p>
+<p class="hint">新增 111–115 學測考點改寫例句與 12 種句型；全部為原創練習，並非官方考題原文。個人資料僅存於本瀏覽器，請定期「備份」。可「匯入」舊版備份 JSON 以合併舊句庫。</p>
 <button class="dg" id="rst">還原預設</button></section></aside>
 <section class="prev"><div class="ph"><div><h2>A4 即時預覽</h2><div id="lay"></div></div><button class="ok" id="pr2">列印目前試卷</button></div><div id="pages"></div></section></main>
 <dialog id="dlg"><h2>新增原創例句</h2><div class="two"><div class="f"><label for="eLv">難度</label><select id="eLv"><option value="2">L2</option><option value="3">L3</option></select></div>
@@ -94,6 +94,7 @@ dialog{border:1px solid var(--line);border-radius:15px;padding:20px;width:min(95
 <div class="f"><label for="eEn">英文例句</label><textarea id="eEn" rows="3" maxlength="500"></textarea></div>
 <div class="tb" style="justify-content:flex-end"><button id="eNo">取消</button><button class="pri" id="eOk">儲存</button></div></dialog>
 <input id="file" type="file" accept=".json,application/json" hidden><div class="notice" id="note" role="status" aria-live="polite"></div>
+<script src="./exam_111_115.js"></script>
 <script>
 "use strict";
 const $=s=>document.querySelector(s);
@@ -137,6 +138,13 @@ const BUILT=[],up=s=>s[0].toUpperCase()+s.slice(1);
 for(let a=0;a<4;a++)for(let b=0;b<4;b++)for(let c=0;c<4;c++)TPLS.forEach((t,j)=>PACKS.forEach((p,i)=>{
   const m={g:p[1][a],G:up(p[1][a]),gz:p[2][a],b:p[3][b],bz:p[4][b],r:p[5][c],rz:p[6][c]},f=s=>s.replace(/\{(\w+)\}/g,(_,k)=>m[k]);
   BUILT.push({id:`g${i}.${j}.${a}${b}${c}`,level:t[1],kind:t[0],topic:p[0],zh:f(t[3]),en:f(t[2]),sg:a,sr:c})}));
+/* 111–115 學測延伸：12 種新句型 × 原有 14 主題 × 64 種組合，另加 57 句人工撰寫考點練習。 */
+const EXAM_TPLS=window.GSAT_EXTRA_TPLS||[];
+for(let a=0;a<4;a++)for(let b=0;b<4;b++)for(let c=0;c<4;c++)EXAM_TPLS.forEach((t,j)=>PACKS.forEach((p,i)=>{
+ const m={g:p[1][a],G:up(p[1][a]),gz:p[2][a],b:p[3][b],bz:p[4][b],r:p[5][c],rz:p[6][c]},f=str=>str.replace(/\{(\w+)\}/g,(_,k)=>m[k]);
+ BUILT.push({id:`x${i}.${j}.${a}${b}${c}`,level:t[1],kind:t[0],topic:p[0],zh:f(t[3]),en:f(t[2]),sg:a,sr:c});
+}));
+BUILT.push(...(window.GSAT_YEAR_BANK||[]));
 const KEY="gsat-writing-v3";
 const DEF={mode:"bal",targetWords:160,pageCap:2,maxItems:12,copies:3,gridType:"four",gridMm:5,lineMm:9,fontSize:12,sheetTitle:"學測英文精選佳句罰寫卷",school:"",student:"",showZh:true,showKey:true};
 let U={custom:[],hidden:[],selected:[],hist:{},config:{...DEF}};
@@ -154,17 +162,17 @@ function rebuild(){
   fill($("#fTp"),[...new Set(bank.map(x=>x.topic))]);fill($("#fKy"),[...new Set(bank.map(x=>x.kind))]);$("#sDb").textContent=bank.length}
 const item=id=>idx.get(id),chosen=()=>U.selected.map(item).filter(Boolean);
 function filtered(){
-  const q=norm($("#q").value).trim().split(/\s+/).filter(Boolean),lv=$("#fLv").value,tp=$("#fTp").value,ky=$("#fKy").value,r=[];
+  const q=norm($("#q").value).trim().split(/\s+/).filter(Boolean),lv=$("#fLv").value,yr=$("#fYear").value,tp=$("#fTp").value,ky=$("#fKy").value,r=[];
   for(const x of bank){
-    if((lv&&String(x.level)!==lv)||(tp&&x.topic!==tp)||(ky&&x.kind!==ky))continue;
-    let s=0;x._s=x._s||norm(x.en+" "+x.zh+" "+x.kind+" "+x.topic);
+    if((lv&&String(x.level)!==lv)||(yr&&x.year!==yr)||(tp&&x.topic!==tp)||(ky&&x.kind!==ky))continue;
+    let s=0;x._s=x._s||norm(x.en+" "+x.zh+" "+x.kind+" "+x.topic+" "+(x.source||""));
     for(const t of q){if(!x._s.includes(t)){s=-1;break}s+=norm(x.kind).includes(t)?3:x.topic===t?2:1}
     if(s>=0)r.push([s,x])}
   return(q.length?r.sort((a,b)=>b[0]-a[0]):r).map(p=>p[1])}
 function renderList(){
   const all=filtered(),on=new Set(U.selected),show=all.slice(0,limit);
   $("#sum").textContent=`符合 ${all.length} 句，顯示 ${show.length} 句。`;
-  $("#list").innerHTML=show.length?show.map(x=>`<div class="it ${on.has(x.id)?"on":""}"><input type="checkbox" data-pick="${esc(x.id)}" ${on.has(x.id)?"checked":""} aria-label="選取"><div class="b"><div class="t">${esc(x.kind)} <span class="pill">${esc(x.topic)}</span></div><div class="en">${esc(x.en)}</div><div class="zh">${esc(x.zh)}</div><div class="meta">L${x.level}・${words(x.en)} 詞${U.hist[x.id]?`・已練習 ${U.hist[x.id]} 次`:""}</div><button class="mini dg" data-hide="${esc(x.id)}">隱藏</button></div></div>`).join(""):'<p class="hint" style="padding:14px">找不到符合條件的例句。</p>';
+  $("#list").innerHTML=show.length?show.map(x=>`<div class="it ${on.has(x.id)?"on":""}"><input type="checkbox" data-pick="${esc(x.id)}" ${on.has(x.id)?"checked":""} aria-label="選取"><div class="b"><div class="t">${esc(x.kind)} <span class="pill">${esc(x.topic)}</span></div><div class="en">${esc(x.en)}</div><div class="zh">${esc(x.zh)}</div><div class="meta">L${x.level}・${words(x.en)} 詞${x.source?`・${esc(x.source)}｜原創例句`:""}${U.hist[x.id]?`・已練習 ${U.hist[x.id]} 次`:""}</div><button class="mini dg" data-hide="${esc(x.id)}">隱藏</button></div></div>`).join(""):'<p class="hint" style="padding:14px">找不到符合條件的例句。</p>';
   $("#more").disabled=all.length<=limit;$("#more").textContent=all.length>limit?`顯示更多（剩 ${all.length-limit}）`:"已顯示全部"}
 function renderSel(){
   const a=chosen();$("#sel").innerHTML=a.length?a.map((x,i)=>`<div class="sr"><span title="${esc(x.en)}">${i+1}. ${esc(x.en)}</span><button data-mv="${esc(x.id)}" data-d="-1" ${i?"":"disabled"}>↑</button><button data-mv="${esc(x.id)}" data-d="1" ${i<a.length-1?"":"disabled"}>↓</button><button data-un="${esc(x.id)}">×</button></div>`).join(""):'<p class="hint">尚未選取例句。</p>'}
@@ -248,7 +256,7 @@ function init(){
   applyCfg();rebuild();
   for(const k of keys)$("#"+k).addEventListener("change",e=>{const el=e.target;cfg[k]=el.type==="checkbox"?el.checked:el.type==="number"?num(el.value,DEF[k],+el.min||0,+el.max||1e9):el.value;save();stats();sched()});
   $("#q").addEventListener("input",()=>{clearTimeout(qt);qt=setTimeout(()=>{limit=40;renderList()},120)});
-  for(const k of ["#fLv","#fTp","#fKy"])$(k).addEventListener("change",()=>{limit=40;renderList()});
+  for(const k of ["#fLv","#fYear","#fTp","#fKy"])$(k).addEventListener("change",()=>{limit=40;renderList()});
   $("#list").addEventListener("change",e=>{if(e.target.dataset.pick)toggle(e.target.dataset.pick,e.target.checked)});
   $("#list").addEventListener("click",e=>{const id=e.target.dataset.hide;if(id&&confirm("確定隱藏這句？")){U.hidden.push(id);U.custom=U.custom.filter(x=>x.id!==id);save();rebuild();refresh()}});
   $("#sel").addEventListener("click",e=>{const d=e.target.dataset;if(d.un)toggle(d.un,false);if(d.mv){const i=U.selected.indexOf(d.mv),j=i+Number(d.d);if(i>=0&&j>=0&&j<U.selected.length){[U.selected[i],U.selected[j]]=[U.selected[j],U.selected[i]];save();refresh()}}});
