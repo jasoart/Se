@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-Hant"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">
-<title>學測英文智能罰寫組卷系統 v5</title>
+<title>學測英文智慧學習工作室 v6</title>
 <style>
+[hidden]{display:none!important}
+.practicePrompt{font-size:19px;line-height:1.7}.practiceAnswer{font:20px/1.7 Georgia,serif;padding:15px;background:#eef4ff;border-radius:12px}details{margin:6px 0}summary{cursor:pointer;font-size:12px;color:var(--pri)}#practice{margin-top:10px;width:100%}#grades{margin:15px 0}button:focus-visible,summary:focus-visible{outline:3px solid #e0a52a;outline-offset:3px}
 :root{--ink:#17243b;--mut:#63728a;--line:#e0e7f0;--pri:#2959c8;--bg:#f1f5fb}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px system-ui,"Microsoft JhengHei",sans-serif}
 button,input,select,textarea{font:inherit}
@@ -56,7 +58,7 @@ dialog{border:1px solid var(--line);border-radius:15px;padding:20px;width:min(95
 .pw{display:block!important;width:210mm!important;height:297mm!important;break-after:page}.pw:last-child{break-after:auto}
 .paper{transform:none!important;box-shadow:none!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 </style></head><body>
-<header class="top"><div><b>學測英文 · 智能罰寫組卷 v5</b><small>23,353 句原創句庫｜111–115年學測考點｜新增12種句型｜A4 智慧組卷</small></div>
+<header class="top"><div><b>學測英文 · 智慧學習工作室 v6</b><small>58,465 句練習庫｜考點解析 × 間隔複習 × A4 智慧組卷</small></div>
 <div class="acts"><button id="exp">備份</button><button id="imp">匯入</button><button class="ok" id="pr1">列印／存 PDF</button></div></header>
 <main class="ws"><aside class="side">
 <section class="panel"><h2>組卷統計</h2><div class="stats">
@@ -67,14 +69,17 @@ dialog{border:1px solid var(--line);border-radius:15px;padding:20px;width:min(95
 <div class="f"><label for="pageCap">最多 A4 張數</label><input id="pageCap" type="number" min="1" max="15"></div>
 <div class="f"><label for="maxItems">最多句數</label><input id="maxItems" type="number" min="1" max="100"></div>
 <div class="f"><label for="copies">每句抄寫次數</label><input id="copies" type="number" min="1" max="20"></div></div>
-<div class="f"><label for="mode">組卷策略</label><select id="mode"><option value="bal">平衡：優先未練習</option><option value="new">只挑未練習</option><option value="hard">挑戰進階（L3 優先）</option><option value="rev">複習已練習</option></select></div>
+<div class="f"><label for="mode">組卷策略</label><select id="mode"><option value="bal">適性：到期、難句與新句</option><option value="due">只挑到期複習</option><option value="new">只挑未練習</option><option value="hard">挑戰進階（L3 優先）</option><option value="rev">複習已練習</option></select></div>
 <div class="tb"><button class="pri" id="smart">✦ 智慧組卷</button><button id="rnd">隨機組卷</button><button id="clr">清空</button><button id="clrH">清除紀錄</button></div>
-<p class="hint">依策略排序 → 主題／句型限量並避免重複詞組 → 背包 DP 湊近目標詞數 → 由易到難排列，再依實際版面修正頁數。列印後自動累計各句練習次數。</p></section>
+<p class="hint">依目前篩選、複習到期日與自評難度選句，兼顧主題／句型多樣性、詞數與頁數。列印不會增加練習紀錄。</p><p class="hint" id="planInfo" role="status"></p></section>
+<section class="panel"><h2>今日學習</h2><p id="learnStats" class="hint"></p><button class="pri" id="practice">開始練習已選例句</button><p class="hint">先看中文回想英文，再自行評估：不熟 10 分鐘後重練、吃力 1 天後複習、熟悉 3 天起逐次延長。紀錄僅存於此瀏覽器。</p></section>
 <section class="panel"><h2>句庫搜尋</h2>
-<div class="f"><label for="q">搜尋（英文／中文／句型／主題）</label><input id="q" placeholder="例如 broaden / 閱讀 / only by"></div>
+<div class="f"><label for="q">搜尋（英文／中文／句型／主題）</label><input id="q" placeholder='例如 "due to" -traffic／數位安全'></div>
 <div class="two"><div class="f"><label for="fLv">難度</label><select id="fLv"><option value="">全部</option><option value="2">L2 中階</option><option value="3">L3 進階</option></select></div><div class="f"><label for="fYear">歷屆年份</label><select id="fYear"><option value="">全部年份</option><option value="111">111學測</option><option value="112">112學測</option><option value="113">113學測</option><option value="114">114學測</option><option value="115">115學測</option></select></div>
 <div class="f"><label for="fTp">主題</label><select id="fTp"><option value="">全部</option></select></div>
 <div class="f" style="grid-column:1/3"><label for="fKy">句型</label><select id="fKy"><option value="">全部</option></select></div></div>
+<div class="two"><div class="f"><label for="fSource">例句來源</label><select id="fSource"><option value="">全部來源</option><option value="curated">考點原創（含解析）</option><option value="template">模板變體</option><option value="custom">我的自編</option></select></div><div class="f"><label for="fState">學習狀態</label><select id="fState"><option value="">全部狀態</option><option value="favorite">我的收藏</option><option value="due">到期複習</option><option value="weak">不熟／吃力</option><option value="new">尚未練習</option></select></div></div>
+<p class="hint">空格分隔多個關鍵字；用雙引號搜尋完整片語，用減號排除詞語。年份篩選僅列出考點原創例句。</p>
 <div class="tb"><button id="addAll">加入目前篩選</button><button id="newB">＋ 新增例句</button></div>
 <p class="hint" id="sum"></p><div class="list" id="list"></div><div style="text-align:center;margin-top:8px"><button id="more">顯示更多</button></div></section>
 <section class="panel"><h2>已選例句（可調順序）</h2><div class="sel" id="sel"></div></section>
@@ -85,7 +90,7 @@ dialog{border:1px solid var(--line);border-radius:15px;padding:20px;width:min(95
 <div class="f"><label for="lineMm">行高 mm</label><input id="lineMm" type="number" min="6" max="14" step=".5"></div>
 <div class="f"><label for="gridMm">字寬 mm</label><input id="gridMm" type="number" min="3" max="9" step=".5"></div></div>
 <div class="ck"><input type="checkbox" id="showZh"><label for="showZh">印出中文</label></div><div class="ck"><input type="checkbox" id="showKey"><label for="showKey">印出句型標籤</label></div>
-<p class="hint">新增 111–115 學測考點改寫例句與 12 種句型；全部為原創練習，並非官方考題原文。個人資料僅存於本瀏覽器，請定期「備份」。可「匯入」舊版備份 JSON 以合併舊句庫。</p>
+<p class="hint">58,368 句模板變體＋97 句考點原創（40 句新增用法提醒）。模板組合用於句型練習；考點例句並非官方考題原文。114 年資料沿用舊版，本次核對 111、112、113、115 年。完整備份可還原學習進度；例句陣列可合併匯入。</p>
 <button class="dg" id="rst">還原預設</button></section></aside>
 <section class="prev"><div class="ph"><div><h2>A4 即時預覽</h2><div id="lay"></div></div><button class="ok" id="pr2">列印目前試卷</button></div><div id="pages"></div></section></main>
 <dialog id="dlg"><h2>新增原創例句</h2><div class="two"><div class="f"><label for="eLv">難度</label><select id="eLv"><option value="2">L2</option><option value="3">L3</option></select></div>
@@ -93,8 +98,87 @@ dialog{border:1px solid var(--line);border-radius:15px;padding:20px;width:min(95
 <div class="f"><label for="eKy">句型／片語</label><input id="eKy" maxlength="150"></div><div class="f"><label for="eZh">中文意思</label><input id="eZh" maxlength="200"></div>
 <div class="f"><label for="eEn">英文例句</label><textarea id="eEn" rows="3" maxlength="500"></textarea></div>
 <div class="tb" style="justify-content:flex-end"><button id="eNo">取消</button><button class="pri" id="eOk">儲存</button></div></dialog>
+<dialog id="practiceDialog" aria-labelledby="practiceHeading"><h2 id="practiceHeading">主動回想練習</h2><p id="practiceProgress" class="hint"></p><p id="prompt" class="practicePrompt"></p><p id="answer" class="practiceAnswer" lang="en" hidden></p><p id="practiceNote" class="hint"></p><button class="pri" id="reveal">顯示參考英文</button><div class="tb" id="grades" hidden><button data-grade="again">不熟 · 10 分鐘</button><button data-grade="hard">吃力 · 1 天</button><button data-grade="good">熟悉 · 延後複習</button></div><button class="mini" id="practiceClose">結束練習</button></dialog>
 <input id="file" type="file" accept=".json,application/json" hidden><div class="notice" id="note" role="status" aria-live="polite"></div>
 <script>
+/* Shared pure functions: browser + Node, no network dependencies. */
+(function(root){
+  'use strict';
+  const DAY=86400000;
+  const normalize=s=>String(s??'').normalize('NFKC').toLowerCase().replace(/[’‘]/g,"'");
+  const wordCount=s=>(String(s).match(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu)||[]).length;
+  function query(text){
+    return [...normalize(text).matchAll(/(-?)(?:"([^"]+)"|(\S+))/g)].map(m=>({exclude:m[1]==='-',text:m[2]||m[3],phrase:!!m[2]}));
+  }
+  const matches=(text,terms)=>terms.every(t=>{
+    let found=text.includes(t.text);
+    if(found&&t.phrase){
+      found=false;let pos=text.indexOf(t.text);
+      while(pos>=0){const before=text[pos-1]||'',after=text[pos+t.text.length]||'';
+        if(!(/[a-z0-9]/i.test(t.text[0])&&/[a-z0-9]/i.test(before))&&!(/[a-z0-9]/i.test(t.text.at(-1))&&/[a-z0-9]/i.test(after))){found=true;break}
+        pos=text.indexOf(t.text,pos+1);
+      }
+    }return t.exclude?!found:found;
+  });
+  function review(previous,grade,now=Date.now()){
+    const p=previous||{},old=Math.max(0,Number(p.interval)||0);
+    const interval=grade==='again'?0:grade==='hard'?1:old?Math.min(180,Math.max(3,Math.round(old*2.2))):3;
+    return {interval,due:now+(grade==='again'?10*60000:interval*DAY),last:now,
+      attempts:(Number(p.attempts)||0)+1,lapses:(Number(p.lapses)||0)+(grade==='again'?1:0),grade};
+  }
+  function cleanReviews(input){
+    const out={};
+    if(!input||typeof input!=='object'||Array.isArray(input))return out;
+    for(const [id,r] of Object.entries(input)){
+      if(!r||typeof r!=='object'||!['again','hard','good'].includes(r.grade))continue;
+      if(!['due','last','interval','attempts','lapses'].every(k=>Number.isFinite(r[k])&&r[k]>=0))continue;
+      if(r.interval>180||r.attempts>1e7||r.lapses>r.attempts)continue;
+      Object.defineProperty(out,id,{value:{due:r.due,last:r.last,interval:r.interval,attempts:r.attempts,lapses:r.lapses,grade:r.grade},enumerable:true,writable:true,configurable:true});
+    }return out;
+  }
+  function select(bank,{mode='bal',target=160,copies=3,limit=12,hist={},reviews={},now=Date.now(),random=Math.random}={}){
+    const seen=new Set();
+    const eligible=bank.filter(x=>{
+      const key=normalize(x.en);if(seen.has(key))return false;seen.add(key);
+      const practiced=!!hist[x.id]||!!reviews[x.id];
+      return mode==='new'?!practiced:mode==='rev'?practiced:mode==='due'?reviews[x.id]?.due<=now:true;
+    });
+    const priority=x=>{
+      const r=reviews[x.id];
+      if(mode==='random')return random()*10;
+      return (r?.due<=now?20:0)+(r?.grade==='again'?10:r?.grade==='hard'?5:0)+(!hist[x.id]&&!r?3:0)+(mode==='hard'&&x.level===3?12:0)+random();
+    };
+    const ranked=eligible.map(x=>({x,p:priority(x),w:wordCount(x.en)*copies})).sort((a,b)=>b.p-a.p);
+    // Keep a bounded, diverse candidate pool; each path owns its own choices.
+    const pool=[],groups=new Map(),deferred=[];
+    for(const e of ranked){const k=e.x.topic+'|'+e.x.kind,n=groups.get(k)||0;
+      if(n<2){pool.push(e);groups.set(k,n+1)}else deferred.push(e);
+      if(pool.length>=180)break;
+    }
+    if(pool.length<180)pool.push(...deferred.slice(0,180-pool.length));
+    let beam=[{items:[],w:0,p:0,topics:new Set(),kinds:new Set()}];
+    const ceiling=Math.ceil(target*1.2);
+    const value=s=>-Math.abs(s.w-target)/Math.max(1,target)*100+s.p/Math.max(1,s.items.length)*0.3+s.topics.size+s.kinds.size;
+    for(const e of pool){
+      const next=[...beam];
+      for(const s of beam){
+        if(s.items.length>=limit||s.w+e.w>ceiling)continue;
+        next.push({items:[...s.items,e.x],w:s.w+e.w,p:s.p+e.p,topics:new Set([...s.topics,e.x.topic]),kinds:new Set([...s.kinds,e.x.kind])});
+      }
+      next.sort((a,b)=>value(b)-value(a));
+      const unique=new Set();beam=[];
+      for(const s of next){const k=s.w+'|'+s.items.length+'|'+s.items.map(x=>x.id).join(',');if(unique.has(k))continue;unique.add(k);beam.push(s);if(beam.length===48)break}
+      // An empty path allows later short/high-priority entries to compete.
+      if(!beam.some(s=>!s.items.length))beam.push({items:[],w:0,p:0,topics:new Set(),kinds:new Set()});
+    }
+    const best=beam.filter(s=>s.items.length).sort((a,b)=>value(b)-value(a))[0];
+    return best?best.items.sort((a,b)=>a.level-b.level||wordCount(a.en)-wordCount(b.en)):[];
+  }
+  const api={DAY,normalize,wordCount,query,matches,review,cleanReviews,select};
+  if(typeof module!=='undefined'&&module.exports)module.exports=api;
+  root.GSATCore=api;
+})(typeof window!=='undefined'?window:globalThis);
+
 /* GSAT 111–115: verified question anchors; all exercise sentences are original paraphrases, not official question text. */
 (() => {
 const R=[["111","1","have sth. delivered","詞彙","Although the store was nearly closed, Mia managed to have the medicine delivered to her grandfather before midnight.","雖然商店快打烊了，米亞仍設法在午夜前讓藥品送到祖父家。"],["111","4","potentially + adjective","詞彙","Because the chemical may cause serious harm, workers are required to wear masks when handling this potentially dangerous material.","由於這種化學品可能造成嚴重傷害，員工處理這種潛在危險的材料時必須戴口罩。"],["111","7","barely visible to","詞彙","Hidden behind several tall buildings, the entrance to the small museum was barely visible to visitors passing by.","小博物館的入口藏在幾棟高樓後面，路過的遊客幾乎看不見。"],["111","8","eventual + noun","詞彙","The team expected the repairs to be cheap, but the eventual cost was much higher than anyone had predicted.","團隊原以為修理費用不高，最後的花費卻遠高於所有人的預期。"],["111","9","go on a quest for","詞彙","Inspired by an old map, the young explorer went on a quest for a village that few people had ever visited.","受到一張舊地圖啟發，年輕探險家踏上尋找少有人造訪村莊的旅程。"],["111","11","be initiated by","綜測","The recycling project was initiated by local students, who hoped to reduce the amount of plastic waste in their town.","回收計畫由當地學生發起，他們希望減少鎮上的塑膠垃圾。"],["111","12","since + present perfect","綜測","Since the city introduced a bike-sharing program, more residents have been choosing bicycles instead of driving to work.","自從城市推出公共自行車計畫，越來越多居民選擇騎車而非開車上班。"],["111","16","other than","綜測","The new library was built for reasons other than appearance, including the need to provide more space for students.","新圖書館興建的原因不只是外觀，還包括提供學生更多空間的需求。"],["111","17","used to + V","綜測","Before online classes became common, many students used to travel long distances to attend lessons after school.","在網路課程普及之前，許多學生過去得長途跋涉去上課。"],["111","19","be subjected to","綜測","When bridges are subjected to strong winds for long periods, engineers must check whether their structures remain safe.","當橋梁長時間受到強風作用，工程師必須確認其結構是否依然安全。"],["111","T1","not A but B","中譯英","Keeping a pet is not simply a short-term hobby but a long-term responsibility that every owner should take seriously.","養寵物不只是短期興趣，而是每位飼主都應認真看待的長期責任。"],["112","7","counter a claim","詞彙","The scientist collected new evidence to counter the company's claim that its product could solve every health problem.","科學家蒐集新證據，反駁該公司宣稱產品可以解決所有健康問題的說法。"],["112","8","cripple the economy","詞彙","Years of conflict have crippled the local economy, leaving thousands of workers without stable jobs or reliable income.","多年的衝突重創當地經濟，使數千名勞工失去穩定工作和收入。"],["112","9","be choked with","詞彙","The roads leading to the stadium were choked with traffic as thousands of fans arrived for the final game.","當數千名球迷前來觀看決賽，通往體育場的道路擠滿車輛。"],["112","10","supposedly + adjective","詞彙","The supposedly harmless online challenge turned out to be dangerous, especially for children who copied it without thinking.","這項據稱無害的網路挑戰結果相當危險，對不假思索模仿的孩童尤其如此。"],["112","13","compete for resources","綜測","As rainfall becomes less predictable, plants in dry regions must compete for limited water and space to survive.","隨著降雨越來越難預測，乾燥地區的植物必須爭奪有限的水和空間才能生存。"],["112","14","exposure to","綜測","Regular exposure to natural light may help people sleep better, although the effects vary from one person to another.","規律接觸自然光可能有助睡眠，但效果因人而異。"],["112","15","despite + noun","綜測","Despite years of research, scientists have not reached an agreement on why certain trees avoid touching nearby branches.","儘管研究多年，科學家對某些樹木為何避免接觸鄰近樹枝仍沒有共識。"],["112","18","redistribute + object","綜測","When the school reduced classroom sizes, it had to redistribute teachers and equipment among several different buildings.","當學校縮小班級規模時，必須重新分配各棟建築的老師與設備。"],["112","20","be accompanied by","綜測","The sudden change in weather was accompanied by strong winds, forcing the outdoor concert to end earlier than planned.","天氣突然變化並伴隨強風，迫使戶外演唱會提前結束。"],["112","T1","history has shown that","中譯英","History has repeatedly shown that even a brief war can cause terrible suffering that lasts for many generations.","歷史一再顯示，即使短暫的戰爭也可能造成延續數代的可怕痛苦。"],["112","T2","make it a goal to","中譯英","To protect future generations, countries should make it a common goal to prevent conflicts and maintain world peace.","為保護下一代，各國應以預防衝突及維護世界和平為共同目標。"],["113","2","emerge from","詞彙","As the sun began to emerge from behind the mountains, the hikers stopped to enjoy the changing colors of the sky.","當太陽開始從山後升起時，登山客停下腳步欣賞天空變化的色彩。"],["113","3","be due to + V","詞彙","The next train is due to arrive in ten minutes, but passengers should check the screen for possible delays.","下一班列車預計十分鐘後抵達，但乘客仍應查看螢幕確認是否延誤。"],["113","5","stand the test of time","詞彙","A truly meaningful story can stand the test of time because readers from different generations still find it moving.","真正有意義的故事經得起時間考驗，因為不同世代的讀者仍會被它感動。"],["113","7","take credit for","詞彙","The manager took credit for the entire project, even though most of the work had been completed by her team.","經理把整個專案的功勞歸於自己，儘管大部分工作由團隊完成。"],["113","9","make an appeal to","詞彙","Facing a serious shortage of volunteers, the hospital made an appeal to local residents for additional support.","面臨志工嚴重短缺，醫院向當地居民呼籲提供更多協助。"],["113","11","pose as","綜測","To understand customers' experiences, the researchers posed as ordinary shoppers and quietly observed how staff members offered help.","為了解顧客體驗，研究人員假扮一般購物者，安靜觀察店員如何提供協助。"],["113","12","to which + clause","綜測","The research center to which the samples were sent has developed a new method for detecting harmful substances.","收到樣本的研究中心研發出偵測有害物質的新方法。"],["113","17","equipped with","綜測","Equipped with simple tools, the volunteers traveled from house to house to help older residents repair broken windows.","志工配備簡單工具，逐戶協助年長居民修理破損窗戶。"],["113","19","decline as + clause","綜測","The demand for printed tickets gradually declined as more passengers began using digital passes on their phones.","隨著更多乘客使用手機電子票券，紙本車票需求逐漸下降。"],["113","T2","show respect for","中譯英","By taking part in local festivals, visitors can learn about traditional customs and show respect for different cultures.","透過參加在地節慶，遊客可以了解傳統習俗，並展現對不同文化的尊重。"],["113","T1","whenever + clause","中譯英","Whenever election season approaches, local communities often hold public events where people can discuss issues that affect them.","每當選舉季節接近，地方社區常舉辦公開活動讓民眾討論攸關自身的議題。"],["114","2","fresh seasonal produce","詞彙","Many families visit the farmers' market on weekends because it offers fresh seasonal produce at reasonable prices.","許多家庭週末會去農夫市集，因為那裡以合理價格供應新鮮當季農產品。"],["114","3","memories become blurred","詞彙","Although the details of that summer have become blurred, I still remember how kindly the villagers treated us.","雖然那個夏天的細節已模糊，我仍記得村民對我們有多親切。"],["114","4","offensive remarks","詞彙","The student apologized after realizing that his careless remarks were offensive to classmates from different backgrounds.","那名學生發現自己不經意的言論冒犯了不同背景的同學後，便道了歉。"],["114","5","revise the first draft","詞彙","After receiving thoughtful comments from her teacher, Emma revised the first draft of her essay several times.","艾瑪收到老師用心的回饋後，多次修改作文初稿。"],["114","6","left vacant","詞彙","Left vacant for several years, the old house slowly fell into poor condition and became unsafe for visitors.","那棟老房子空置多年，逐漸破敗，對訪客來說已不安全。"],["114","8","be halted due to","詞彙","Construction of the new station was halted due to a lack of funds, disappointing residents who had expected better transport.","新車站工程因資金不足而停止，讓期待更好交通的居民失望。"],["114","9","grace an event with","詞彙","The respected writer graced the school ceremony with a short speech that encouraged students to follow their dreams.","那位受敬重的作家蒞臨學校典禮並致詞，鼓勵學生追尋夢想。"],["114","11","would + V (future in past)","綜測","When the small company opened its first store, few people imagined that its products would become popular worldwide.","小公司開設第一家店時，很少有人料到它的產品後來會風靡全球。"],["114","14","give rise to","綜測","The discovery gave rise to new questions about how animals communicate, encouraging researchers to design further studies.","這項發現引發動物如何溝通的新問題，促使研究人員設計更多研究。"],["114","19","take preventive measures","綜測","Before the storm arrived, residents took preventive measures by securing windows and preparing enough food and drinking water.","暴風雨到來前，居民採取預防措施，固定窗戶並備足食物與飲水。"],["114","T2","once + past, now + present","中譯英","Devices that once appeared only in science fiction films are now becoming part of everyday life through advances in technology.","過去只出現在科幻電影中的裝置，如今因科技進步而逐漸融入日常生活。"],["115","1","a tight schedule","詞彙","Because the principal had such a tight schedule, the students had to arrange their interview several weeks in advance.","因為校長行程十分緊湊，學生必須提前好幾週安排訪談。"],["115","3","a job vacancy","詞彙","When the company announced a job vacancy, dozens of applicants submitted their resumes before the deadline.","公司公布職缺後，數十名求職者在截止日期前送出履歷。"],["115","4","initially expected","詞彙","The project took longer than initially expected, but the final results were far more useful than the researchers had hoped.","這項計畫比原先預期更耗時，但最後成果遠比研究人員所希望的更有用。"],["115","5","balanced consumption","詞彙","Doctors often emphasize the importance of balanced food consumption rather than relying on a single popular diet.","醫師常強調均衡飲食的重要，而非只依賴某種流行飲食法。"],["115","6","dread the thought of","詞彙","Although she enjoyed learning new languages, Lisa dreaded the thought of speaking English before a large audience.","雖然莉莎喜歡學習新語言，卻害怕在大批觀眾面前說英文。"],["115","9","elbow one's way through","詞彙","With only minutes before departure, the traveler tried to elbow his way through the crowd at the busy station.","離發車只剩幾分鐘，旅客試圖擠過繁忙車站的人群。"],["115","10","raise grave concerns","詞彙","The repeated failures raised grave concerns about public safety, leading officials to order a complete review of the system.","接連發生的故障引起對公共安全的嚴重憂慮，促使官員下令全面檢討系統。"],["115","11","it turns out that","綜測","It turns out that certain animals exchange information through smell, although humans usually depend more heavily on words.","原來某些動物透過氣味交換資訊，儘管人類通常更依賴語言。"],["115","15","be responsive to","綜測","Young plants are especially responsive to changes in light, adjusting their growth as the length of the day changes.","幼小植物對光線變化特別敏感，會隨著日照長度改變調整生長。"],["115","17","had yet to + V","綜測","At the beginning of the century, the technology had yet to develop, so the idea seemed impossible to most scientists.","在世紀初，該技術尚未發展，因此多數科學家認為這個想法不可能實現。"],["115","19","as such","綜測","The first experiments were only small trials and, as such, could not provide enough evidence to support a general conclusion.","最早的實驗只是小規模試驗，因此無法提供足夠證據支持普遍性的結論。"],["115","21","by no means","文意選填","Taking a short rest after studying is by no means a waste of time if it helps students regain concentration.","如果短暫休息能幫助學生恢復注意力，那讀書後休息絕不是浪費時間。"],["115","T2","divide ... into groups based on","中譯英","The teacher divided the students into several groups based on their English abilities and asked them to practice speaking together.","老師依學生英文能力分成數組，請他們一起練習口說。"]];
@@ -102,6 +186,76 @@ window.GSAT_YEAR_BANK=R.map((r,i)=>({id:"ex"+r[0]+"-"+i,year:r[0],question:r[1],
 window.GSAT_EXTRA_TPLS=[["although … without",3,"Although {g} may be difficult at first, it can help us {b} without {r}.","雖然起初{gz}可能很困難，但它能幫助我們{bz}，而不必{rz}。"],["one way to … instead of",3,"One effective way to {b} is to keep {g} instead of {r}, even after setbacks.","有效{bz}的方法之一，是遇到挫折時仍{gz}，而不是{rz}。"],["when … becomes a habit",2,"When {r} becomes a habit, even people who try {g} may struggle to {b}.","當{rz}成為習慣，即使嘗試{gz}的人也可能難以{bz}。"],["rather than … it is … that",3,"It is {g}, rather than {r}, that gives us a better chance to {b}.","真正讓我們更有機會{bz}的是{gz}，而非{rz}。"],["provided that",3,"There is reason to believe that {g} may help us {b}, provided that we avoid {r}.","有理由相信，只要避免{rz}，{gz}就可能幫助我們{bz}。"],["tend to … whereas",3,"Those who focus on {g} tend to {b}, whereas those who keep {r} may fall behind.","專注於{gz}的人往往能{bz}，持續{rz}的人卻可能落後。"],["one reason why",2,"One reason why {g} is worth considering is that it may help us {b} without {r}.","{gz}值得考慮的原因之一，是它可能幫助我們{bz}，又可避免{rz}。"],["what is often overlooked",3,"What is often overlooked is that {g} can help us {b}, especially when we avoid {r}.","常被忽略的是，只要避免{rz}，{gz}尤其能幫助我們{bz}。"],["compared with",3,"Compared with {r}, {g} provides a more reliable way to {b} in the long run.","和{rz}相比，長遠而言{gz}是更可靠的{bz}方法。"],["no matter how",3,"No matter how difficult {g} seems, it remains a useful way to {b} and avoid {r}.","無論{gz}看似多困難，它仍是{bz}並避免{rz}的有效方法。"],["even if … eventually",2,"Even if {g} takes time, the effort may eventually help us {b} while preventing {r}.","即使{gz}需要時間，這份努力最終仍可能幫助我們{bz}並避免{rz}。"],["what makes … valuable",3,"What makes {g} especially valuable is that it can help us {b} and discourage {r}.","{gz}特別有價值之處，在於它可以幫助我們{bz}並減少{rz}。"]];
 window.GSAT_EXAM_SOURCE="111–115學測題目主題、語法與搭配詞；句子為另外撰寫之學測風格例句，不是官方原文。";
 })();
+
+/* v6 additions: original exercises, not quotations or an official answer key.
+   Anchors were checked against the four PDFs supplied for this upgrade. */
+window.GSAT_EXPANSION={
+ packs:`科學探究|recording observations accurately,repeating experiments carefully,checking our measurements,discussing unexpected results|準確記錄觀察,仔細重複實驗,檢查測量結果,討論意外的結果|draw more reliable conclusions,understand the evidence better,identify weaknesses in our methods,improve the quality of our research|得出更可靠的結論,更了解證據,找出方法的弱點,提升研究品質|ignoring inconvenient data,jumping to conclusions,hiding failed experiments,changing several variables at once|忽視不合心意的數據,草率下結論,隱瞞失敗的實驗,一次改變多個變因
+數位安全|checking website addresses,updating security software,using strong passwords,learning to recognize scams|檢查網址,更新安全軟體,使用高強度密碼,學習辨認詐騙|reduce online risks,protect our personal data,use online services more safely,develop safer digital habits|降低網路風險,保護個人資料,更安全地使用網路服務,培養更安全的數位習慣|sharing passwords,opening suspicious attachments,ignoring security warnings,posting private details publicly|分享密碼,開啟可疑附件,忽視安全警告,公開發布私人細節
+生涯探索|reflecting on our interests,interviewing experienced workers,trying different school projects,learning about unfamiliar careers|反思自己的興趣,訪問有經驗的工作者,嘗試不同的學校專題,了解陌生的職業|make informed career choices,discover our strengths,develop realistic expectations,prepare for future opportunities|做出有根據的生涯選擇,發現自己的長處,建立實際的期待,為未來的機會做準備|choosing a job only for money,following others blindly,ignoring our interests,expecting instant success|只為金錢選工作,盲目追隨他人,忽視自己的興趣,期待立即成功
+公民參與|listening to community concerns,attending public meetings,checking policy details,discussing local issues respectfully|傾聽社區的關切,參加公開會議,查核政策細節,尊重地討論地方議題|understand public decisions,contribute to community discussions,make our voices heard,participate more responsibly|理解公共決策,為社區討論做出貢獻,讓自己的聲音被聽見,更負責任地參與|spreading unverified claims,attacking people personally,ignoring minority voices,refusing to consider evidence|散播未經查證的說法,進行人身攻擊,忽視少數人的聲音,拒絕考慮證據
+食物永續|planning meals in advance,storing ingredients properly,using leftovers creatively,checking what is in the fridge|事先規劃餐點,妥善保存食材,創意運用剩食,檢查冰箱內的食物|reduce food waste,make better use of ingredients,save money on groceries,build more sustainable eating habits|減少食物浪費,更充分利用食材,節省購買食材的開銷,建立更永續的飲食習慣|buying more than we need,throwing away usable food,forgetting food in the fridge,serving excessively large portions|購買超出需要的食物,丟棄仍可食用的食物,忘記冰箱裡的食物,供應過大的份量
+文化保存|recording local stories,learning traditional crafts,visiting community museums,supporting local cultural events|記錄地方故事,學習傳統工藝,參觀社區博物館,支持地方文化活動|understand our cultural heritage,connect with older generations,keep local traditions alive,appreciate the history of our community|了解文化資產,與年長世代建立聯繫,讓地方傳統延續,欣賞社區的歷史|dismissing old traditions,judging cultures by stereotypes,ignoring local knowledge,treating heritage only as a product|輕視古老傳統,以刻板印象評斷文化,忽視地方知識,只把文化資產當商品
+團隊合作|sharing responsibilities fairly,clarifying common goals,giving constructive feedback,communicating progress regularly|公平分擔責任,釐清共同目標,提供建設性的回饋,定期溝通進度|complete group projects more effectively,build mutual trust,coordinate our efforts,learn from one another|更有效完成團體專題,建立相互信任,協調彼此的努力,互相學習|blaming others for every mistake,withholding useful information,avoiding difficult conversations,taking all the credit|把每個錯誤都歸咎於他人,隱瞞有用資訊,逃避困難的對話,把功勞全攬在自己身上
+情緒調適|naming our feelings,taking time to reflect,seeking support when needed,practicing calming routines|說出自己的感受,花時間反思,需要時尋求支持,練習讓自己平靜的日常活動|respond to stress more calmly,understand our reactions,manage difficult emotions,develop emotional awareness|更冷靜地面對壓力,了解自己的反應,管理困難的情緒,培養情緒覺察|bottling up our feelings,denying every problem,taking frustration out on others,judging ourselves too harshly|壓抑感受,否認每個問題,把挫折發洩在他人身上,過度苛責自己
+無障礙設計|listening to users with disabilities,testing designs with diverse users,checking accessibility guidelines,improving unclear instructions|傾聽身心障礙使用者,邀請不同使用者測試設計,檢查無障礙指引,改善不清楚的說明|create more inclusive services,remove barriers to participation,make products easier to use,understand different access needs|創造更包容的服務,消除參與障礙,讓產品更容易使用,了解不同的使用需求|assuming everyone has the same needs,ignoring user feedback,relying only on visual cues,treating accessibility as an afterthought|假定每個人的需求相同,忽視使用者回饋,只依賴視覺線索,到最後才考慮無障礙需求
+防災準備|checking emergency supplies,learning evacuation routes,practicing safety drills,following reliable weather updates|檢查緊急物資,了解疏散路線,練習安全演練,關注可靠的天氣資訊|prepare for emergencies,respond more calmly to danger,make safer decisions during disasters,protect ourselves and others|為緊急事件做準備,更冷靜地回應危險,在災害期間做出更安全的決定,保護自己與他人|ignoring official warnings,spreading disaster rumors,waiting until the last minute,underestimating possible risks|忽視官方警告,散播災害謠言,等到最後一刻才行動,低估可能的風險`.split('\n').map(l=>l.split('|').map((s,i)=>i?s.split(','):s)),
+ templates:[
+ ['by … we stand a better chance of',3,'By {g}, we stand a better chance of being able to {b}, provided that we avoid {r}.','藉由{gz}，我們更有機會{bz}，前提是避免{rz}。'],
+ ['instead of … it makes sense to',2,'Instead of {r}, it makes sense to focus on {g}, which can help us {b}.','與其{rz}，不如專注於{gz}，這能幫助我們{bz}。'],
+ ['one practical way to',2,'One practical way to {b} is to make {g} a habit and stop {r}.','要{bz}，一個實際的方法是養成{gz}的習慣，並停止{rz}。'],
+ ['the first step toward',3,'The first step toward being able to {b} is to commit to {g} rather than {r}.','要能夠{bz}，第一步是致力於{gz}，而非{rz}。'],
+ ['without … it is harder to',2,'Without {g}, it is harder to {b}, especially if we keep {r}.','如果沒有{gz}，就更難{bz}，尤其當我們持續{rz}時。'],
+ ['there is little point in',3,'There is little point in {r} when {g} offers us a better opportunity to {b}.','既然{gz}提供了更好的機會讓我們{bz}，{rz}就沒有什麼意義。'],
+ ['it takes … to',2,'It takes a commitment to {g} to {b}; merely {r} will not get us there.','要{bz}，需要致力於{gz}；僅僅{rz}無法讓我們達成目標。'],
+ ['whether … depends partly on',3,'Whether we can {b} depends partly on our commitment to {g} and our willingness to stop {r}.','我們能否{bz}，部分取決於我們對{gz}的投入，以及停止{rz}的意願。'],
+ ['what matters most is',3,'What matters most is {g}, which helps us {b}, rather than {r}.','最重要的是能幫助我們{bz}的{gz}，而不是{rz}。'],
+ ['a shift from … to',3,'A shift from {r} to {g} can put us in a better position to {b}.','從{rz}轉向{gz}，能讓我們更有條件{bz}。'],
+ ['not … overnight',2,'We cannot expect to {b} overnight, but {g} is a better start than {r}.','我們不能期待一夜之間就{bz}，但{gz}是比{rz}更好的開始。'],
+ ['as a result',2,'{G} can help us {b}; as a result, we have good reason to choose it over {r}.','{gz}能幫助我們{bz}；因此，我們有充分理由選擇這麼做，而非{rz}。']
+ ],
+ // year | question | pattern | English | Chinese | usage note
+ curated:`111|1|have + object + past participle|We had the damaged bicycle repaired before lending it to our neighbor.|我們把損壞的自行車修好後，才借給鄰居。|have + 受詞 + 過去分詞表示請人完成某事；不是受詞主動去做。
+111|2|assistant to|As assistant to the director, Leo checks every document before a meeting begins.|身為主管的助理，里歐會在會議開始前檢查每份文件。|assistant 是可數名詞；assistant to someone 表示某人的助理。
+111|3|puppet show|The children made paper puppets and performed a short puppet show for their families.|孩子們製作紙偶，並為家人表演一場簡短的偶戲。|puppet 指由人操縱的戲偶；puppet show 為偶戲。
+111|4|potentially harmful|Even a popular cleaning product can be potentially harmful if it is used incorrectly.|即使是受歡迎的清潔用品，使用不當也可能有害。|potentially 是副詞，修飾 harmful；表達可能性而非確定結果。
+111|5|tag … with|Please tag each photograph with a location so that visitors can search the archive easily.|請替每張照片標註地點，讓訪客能輕鬆搜尋檔案。|tag A with B：用 B 標示 A；so that 後接完整子句。
+111|6|agreeable|Our new teammate is agreeable, yet she speaks up whenever she notices an unfair decision.|新隊友很好相處，但每當她發現不公平的決定時，仍會表達意見。|agreeable 可指友善、好相處；不等於總是同意別人。
+111|7|visible from|The lighthouse is clearly visible from the hill, even on a cloudy afternoon.|即使在陰天的午後，從山丘上仍能清楚看見燈塔。|visible from 表示從某處看得見；visible to 表示某人看得見。
+111|8|eventual outcome|No one could predict the eventual outcome, so the team prepared several backup plans.|沒有人能預測最後的結果，因此團隊準備了幾個備案。|eventual 是形容詞，表示最終的；eventually 是副詞。
+111|9|in a quest for|In a quest for cleaner energy, the students compared several ways to power their model car.|為了尋找更乾淨的能源，學生比較了幾種驅動模型車的方法。|a quest for + 名詞，表示對某物的追尋。
+111|10|blush with|Nina blushed with embarrassment when she realized that she had called the teacher by the wrong name.|妮娜發現自己叫錯老師名字時，尷尬得臉紅了。|blush 可作不及物動詞；with embarrassment 說明臉紅的原因。
+112|1|sticky|The label left a sticky mark on the jar, which took several minutes to wash off.|標籤在罐子上留下黏黏的痕跡，花了好幾分鐘才洗掉。|sticky 描述表面黏性；stick 的過去式與過去分詞是 stuck。
+112|2|strike a pose|The actor struck a confident pose while the photographer adjusted the lights.|攝影師調整燈光時，演員擺出自信的姿勢。|strike a pose 為擺姿勢；strike 的過去式是 struck。
+112|3|ancestors|By reading old letters, Irene learned how her ancestors built a new life in a distant town.|透過閱讀舊信件，艾琳得知祖先如何在遠方的小鎮建立新生活。|ancestor 是祖先；descendant 是後代，注意方向相反。
+112|4|bare|After the books were packed, the bare shelves made the room look unusually empty.|書籍裝箱後，空蕩的書架讓房間顯得格外空曠。|bare 強調沒有覆蓋物或物品；blank 常指表面沒有文字或內容。
+112|5|sincerity|The sincerity of his apology became clear when he offered to repair the damage himself.|當他主動提出親自修復損壞時，道歉的誠意便顯而易見。|sincerity 是名詞；sincere 是形容詞，sincerely 是副詞。
+112|6|recall doing|I clearly recall meeting the author at a small bookshop when I was in junior high school.|我清楚記得國中時曾在一家小書店遇見那位作家。|recall 後可接動名詞，表示回想起曾做過的事。
+112|7|counter an argument|To counter the argument, Maya presented data from three independent studies.|為了反駁該論點，瑪雅提出三項獨立研究的資料。|counter 作及物動詞可直接接受詞，不需加 against。
+112|8|be crippled by|The coastal town was crippled by the storm, and many shops remained closed for weeks.|沿海小鎮遭風暴重創，許多商店持續關閉數週。|cripple 在此表示嚴重削弱運作能力；被動語態可接 by。
+112|9|be choked with|The narrow river was choked with fallen branches after several days of heavy rain.|連日大雨後，狹窄的河道被掉落的樹枝堵塞。|be choked with 描述被大量事物阻塞的狀態。
+112|10|supposedly|The supposedly quiet hotel turned out to be next to a busy construction site.|那間據說很安靜的旅館，結果就在繁忙的工地旁。|supposedly 表示據稱，常暗示說話者有所保留。
+113|1|slender|A slender wooden bridge connects the two gardens without blocking the view of the river.|一座纖細的木橋連接兩座花園，且不會遮擋河景。|slender 可描述細長的物體；不只用來形容身材。
+113|2|emerge from|A clear pattern emerged from the survey after the researchers organized the responses.|研究人員整理回覆後，調查中浮現出清楚的模式。|emerge from 表示從某處出現或由資料中浮現。
+113|3|be due|The final report is due on Friday, so we need to finish collecting data today.|期末報告週五到期，因此我們今天必須完成資料蒐集。|be due 可表示預定時間或期限；on 接日期、星期。
+113|4|humidity|High humidity can damage old books unless the library carefully controls the indoor environment.|除非圖書館仔細控制室內環境，否則高濕度可能損壞舊書。|humidity 是濕度；humid 是形容詞。
+113|5|stand the test of time|A well-designed public park can stand the test of time and serve several generations.|設計良好的公園能經得起時間考驗，並服務好幾代人。|stand the test of time 表示經得起時間考驗。
+113|6|compulsory|Safety training is compulsory for all volunteers before they enter the animal shelter.|所有志工進入動物收容所前，都必須接受安全訓練。|compulsory 表示強制的；optional 表示可選擇的。
+113|7|give … credit for|The manager gave the interns credit for finding a simple solution to a difficult problem.|經理肯定實習生找到了困難問題的簡單解法。|give someone credit for + 名詞或動名詞，表示肯定其貢獻。
+113|8|promise|The new train service promises a faster journey between the mountain town and the city.|新的鐵路服務可望縮短山城與都市之間的旅程。|promise 除了承諾，也能表示有望帶來某種結果。
+113|9|make an appeal for|The shelter made an appeal for warm blankets as temperatures began to fall.|氣溫開始下降時，收容所呼籲民眾捐贈保暖毯子。|make an appeal for + 所需事物；appeal to someone for help。
+113|10|randomly assigned|Participants were randomly assigned to two groups to reduce the influence of personal preferences.|參與者被隨機分配至兩組，以減少個人偏好的影響。|randomly 是副詞，修飾 assigned；assign A to B。
+115|1|a tight schedule|Despite a tight schedule, the doctor set aside an hour to answer the students' questions.|儘管行程緊湊，醫師仍撥出一小時回答學生的問題。|tight schedule 表示行程緊湊；set aside time 表示撥出時間。
+115|2|amateur|An amateur photographer captured the rare bird without disturbing its nest.|一位業餘攝影師在沒有打擾鳥巢的情況下拍到了這隻稀有鳥類。|amateur 可作名詞或形容詞，指非以該活動為職業者。
+115|3|vacancy|The museum posted a vacancy for a guide who could explain local history in English.|博物館公告一個導覽員職缺，要求能以英文介紹地方歷史。|vacancy 可指職缺；a vacancy for + 職位。
+115|4|initially|The plan initially seemed too expensive, but a local business later offered financial support.|計畫起初似乎太昂貴，但後來一家地方企業提供了資金支持。|initially 表示起初，常與 later 或 eventually 對照。
+115|5|consumption of|The school reduced its consumption of electricity by replacing old lights with efficient ones.|學校以節能燈具汰換舊燈，降低了用電量。|consumption of + 資源，表示消耗或攝取；動詞為 consume。
+115|6|dread doing|I used to dread asking questions in class until I discovered that others had the same doubts.|我以前害怕在課堂上發問，直到發現別人也有相同疑問。|dread 後可接動名詞；used to + 原形動詞表示過去習慣。
+115|7|a passion for|Her passion for marine biology led her to volunteer at an aquarium during the summer.|她對海洋生物學的熱情，促使她暑假到水族館擔任志工。|a passion for + 名詞；lead someone to + 原形動詞。
+115|8|assault|The witness reported the assault immediately and stayed nearby until help arrived.|目擊者立即通報攻擊事件，並留在附近直到援助到來。|assault 可作名詞或動詞，指攻擊；此處為名詞。
+115|9|elbow one's way|We refused to elbow our way to the front and waited patiently for the crowd to move.|我們不願用手肘擠到前面，而是耐心等候人群移動。|elbow one's way 表示用手肘擠出一條路；way 前的人稱須配合主詞。
+115|10|grave concerns|Residents expressed grave concerns about the safety of the old bridge after the flood.|洪水過後，居民對老橋的安全表達了嚴重憂慮。|grave 作形容詞可表示嚴重的；此處不是墳墓的意思。`.split('\n').map((s,i)=>{const [year,question,kind,en,zh,note]=s.split('|');return {id:'v6-exam-'+year+'-'+question,year,question,kind,en,zh,note,level:2,topic:'考點詞彙',origin:'curated',source:year+'學測第'+question+'題・考點延伸'};})
+};
 
 </script>
 <script>
@@ -154,15 +308,36 @@ for(let a=0;a<4;a++)for(let b=0;b<4;b++)for(let c=0;c<4;c++)EXAM_TPLS.forEach((t
  BUILT.push({id:`x${i}.${j}.${a}${b}${c}`,level:t[1],kind:t[0],topic:p[0],zh:f(t[3]),en:f(t[2]),sg:a,sr:c});
 }));
 BUILT.push(...(window.GSAT_YEAR_BANK||[]));
+// v5 IDs remain stable; new templates use independent namespaces.
+const Core=window.GSATCore,extra=window.GSAT_EXPANSION;
+const appendPack=(p,i,templates,prefix)=>{
+ for(let a=0;a<4;a++)for(let b=0;b<4;b++)for(let c=0;c<4;c++)templates.forEach((t,j)=>{
+  const m={g:p[1][a],G:up(p[1][a]),gz:p[2][a],b:p[3][b],bz:p[4][b],r:p[5][c],rz:p[6][c]},f=str=>str.replace(/\{(\w+)\}/g,(_,k)=>m[k]);
+  BUILT.push({id:`${prefix}${i}.${j}.${a}${b}${c}`,level:t[1],kind:t[0],topic:p[0],zh:f(t[3]),en:f(t[2]),sg:a,sr:c,origin:'template'});
+ });
+};
+extra.packs.forEach((p,i)=>appendPack(p,i,[...TPLS,...EXAM_TPLS],'v6p'));
+[...PACKS,...extra.packs].forEach((p,i)=>appendPack(p,i,extra.templates,'v6t'));
+BUILT.push(...extra.curated);
+for(const x of BUILT)x.origin=x.origin||(x.year?'curated':'template');
 const KEY="gsat-writing-v3";
-const DEF={mode:"bal",targetWords:160,pageCap:2,maxItems:12,copies:3,gridType:"four",gridMm:5,lineMm:9,fontSize:12,sheetTitle:"學測英文精選佳句罰寫卷",school:"",student:"",showZh:true,showKey:true};
-let U={custom:[],hidden:[],selected:[],hist:{},config:{...DEF}};
-try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&typeof s==="object")U={custom:Array.isArray(s.custom)?s.custom:[],hidden:Array.isArray(s.hidden)?s.hidden:[],selected:Array.isArray(s.selected)?s.selected:[],hist:(s.hist&&typeof s.hist==="object")?s.hist:{},config:{...DEF,...(s.config||{})}}}catch(e){}
-const cfg=U.config;let bank=[],idx=new Map(),limit=40,pages=[],nt=null,raf=null,qt=null;
+const DEF={mode:"bal",targetWords:160,pageCap:2,maxItems:12,copies:3,gridType:"four",gridMm:5,lineMm:9,fontSize:12,sheetTitle:"學測英文自主練習卷",school:"",student:"",showZh:true,showKey:true};
+let hadSavedState=false;
+let U={custom:[],hidden:[],selected:[],hist:{},reviews:{},favorites:[],config:{...DEF}};
+try{const s=JSON.parse(localStorage.getItem(KEY));hadSavedState=!!s;if(s&&typeof s==="object")U={custom:Array.isArray(s.custom)?s.custom:[],hidden:Array.isArray(s.hidden)?s.hidden:[],selected:Array.isArray(s.selected)?s.selected:[],hist:(s.hist&&typeof s.hist==="object")?s.hist:{},reviews:Core.cleanReviews(s.reviews),favorites:Array.isArray(s.favorites)?s.favorites.filter(x=>typeof x==="string"):[],config:{...DEF,...(s.config||{})}}}catch(e){}
+const cfg=U.config;
+// Normalize imported or older settings before they reach page layout.
+function sanitizeConfig(input){const result={...DEF};for(const k of Object.keys(DEF)){
+ const v=input?.[k],d=DEF[k];
+ if(typeof d==='number'){const e=document.getElementById(k);result[k]=num(v,d,+e.min,+e.max)}
+ else if(typeof d==='boolean')result[k]=typeof v==='boolean'?v:d;
+ else if(typeof v==='string')result[k]=v.slice(0,150);
+ }for(const k of ['targetWords','pageCap','maxItems','copies'])result[k]=Math.round(result[k]);if(!['bal','new','hard','rev','due'].includes(result.mode))result.mode='bal';if(!['four','line','box'].includes(result.gridType))result.gridType='four';return result;}
+Object.assign(cfg,sanitizeConfig(cfg));let bank=[],idx=new Map(),limit=40,pages=[],nt=null,raf=null,qt=null;
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(U))}catch(e){toast("儲存空間不足，請先備份。")}};
 function toast(m){const n=$("#note");n.textContent=m;n.classList.add("show");clearTimeout(nt);nt=setTimeout(()=>n.classList.remove("show"),3000)}
 const valid=x=>x&&typeof x.en==="string"&&x.en.trim()&&x.en.length<=500&&String(x.zh||"").length<=200;
-const clean=(x,id)=>({id,level:num(x.level,2,1,3),kind:String(x.kind||x.phrase||"自編").slice(0,150),topic:String(x.topic||"自編").slice(0,30),zh:String(x.zh||"").slice(0,200),en:String(x.en).trim().slice(0,500)});
+const clean=(x,id)=>({id,level:num(x.level,2,1,3),kind:String(x.kind||x.phrase||"自編").slice(0,150),origin:"custom",topic:String(x.topic||"自編").slice(0,30),zh:String(x.zh||"").slice(0,200),en:String(x.en).trim().slice(0,500)});
 function rebuild(){
   const h=new Set(U.hidden);
   bank=[...BUILT.filter(x=>!h.has(x.id)),...U.custom.filter(x=>valid(x)&&!h.has(x.id)).map(x=>clean(x,String(x.id)))];
@@ -171,23 +346,30 @@ function rebuild(){
   fill($("#fTp"),[...new Set(bank.map(x=>x.topic))]);fill($("#fKy"),[...new Set(bank.map(x=>x.kind))]);$("#sDb").textContent=bank.length}
 const item=id=>idx.get(id),chosen=()=>U.selected.map(item).filter(Boolean);
 function filtered(){
-  const q=norm($("#q").value).trim().split(/\s+/).filter(Boolean),lv=$("#fLv").value,yr=$("#fYear").value,tp=$("#fTp").value,ky=$("#fKy").value,r=[];
-  for(const x of bank){
-    if((lv&&String(x.level)!==lv)||(yr&&x.year!==yr)||(tp&&x.topic!==tp)||(ky&&x.kind!==ky))continue;
-    let s=0;x._s=x._s||norm(x.en+" "+x.zh+" "+x.kind+" "+x.topic+" "+(x.source||""));
-    for(const t of q){if(!x._s.includes(t)){s=-1;break}s+=norm(x.kind).includes(t)?3:x.topic===t?2:1}
-    if(s>=0)r.push([s,x])}
-  return(q.length?r.sort((a,b)=>b[0]-a[0]):r).map(p=>p[1])}
+ const terms=Core.query($("#q").value),lv=$("#fLv").value,yr=$("#fYear").value,tp=$("#fTp").value,ky=$("#fKy").value,origin=$("#fSource").value,state=$("#fState").value,now=Date.now(),favorites=new Set(U.favorites);
+ return bank.filter(x=>{
+  if((lv&&String(x.level)!==lv)||(yr&&x.year!==yr)||(tp&&x.topic!==tp)||(ky&&x.kind!==ky)||(origin&&x.origin!==origin))return false;
+  const r=U.reviews[x.id];
+  if(state==='favorite'&&!favorites.has(x.id)||state==='due'&&!(r?.due<=now)||state==='new'&&(r||U.hist[x.id])||state==='weak'&&!['again','hard'].includes(r?.grade))return false;
+  x._s=x._s||Core.normalize([x.en,x.zh,x.kind,x.topic,x.source||'',x.note||''].join(' '));
+  return Core.matches(x._s,terms);
+ });
+}
+function reviewLabel(x){const r=U.reviews[x.id];return !r?'尚未自評':r.due<=Date.now()?'已到期':`下次：${new Date(r.due).toLocaleDateString('zh-TW')}`;}
+function learningStats(){const now=Date.now(),due=bank.filter(x=>U.reviews[x.id]?.due<=now).length;
+ $('#learnStats').textContent=`到期 ${due} 句 · 已自評 ${Object.keys(U.reviews).length} 句 · 收藏 ${U.favorites.length} 句`;
+ $('#practice').disabled=!U.selected.length;
+}
 function renderList(){
   const all=filtered(),on=new Set(U.selected),show=all.slice(0,limit);
   $("#sum").textContent=`符合 ${all.length} 句，顯示 ${show.length} 句。`;
-  $("#list").innerHTML=show.length?show.map(x=>`<div class="it ${on.has(x.id)?"on":""}"><input type="checkbox" data-pick="${esc(x.id)}" ${on.has(x.id)?"checked":""} aria-label="選取"><div class="b"><div class="t">${esc(x.kind)} <span class="pill">${esc(x.topic)}</span></div><div class="en">${esc(x.en)}</div><div class="zh">${esc(x.zh)}</div><div class="meta">L${x.level}・${words(x.en)} 詞${x.source?`・${esc(x.source)}｜原創例句`:""}${U.hist[x.id]?`・已練習 ${U.hist[x.id]} 次`:""}</div><button class="mini dg" data-hide="${esc(x.id)}">隱藏</button></div></div>`).join(""):'<p class="hint" style="padding:14px">找不到符合條件的例句。</p>';
+  $("#list").innerHTML=show.length?show.map(x=>`<div class="it ${on.has(x.id)?"on":""}"><input type="checkbox" data-pick="${esc(x.id)}" ${on.has(x.id)?"checked":""} aria-label="選取"><div class="b"><div class="t">${esc(x.kind)} <span class="pill">${esc(x.topic)}</span></div><div class="en">${esc(x.en)}</div><div class="zh">${esc(x.zh)}</div><div class="meta">L${x.level}・${words(x.en)} 詞${x.source?`・${esc(x.source)}｜原創例句`:""}${U.hist[x.id]?`・練習紀錄 ${U.hist[x.id]} 次`:""}・${esc(reviewLabel(x))}・${{template:"模板變體",curated:"考點原創",custom:"自編"}[x.origin]}</div>${x.note?`<details><summary>用法提醒</summary><p class="hint">${esc(x.note)}</p></details>`:""}<button class="mini" data-fav="${esc(x.id)}" aria-pressed="${U.favorites.includes(x.id)}">${U.favorites.includes(x.id)?"★ 已收藏":"☆ 收藏"}</button> <button class="mini dg" data-hide="${esc(x.id)}">隱藏</button></div></div>`).join(""):'<p class="hint" style="padding:14px">找不到符合條件的例句。</p>';
   $("#more").disabled=all.length<=limit;$("#more").textContent=all.length>limit?`顯示更多（剩 ${all.length-limit}）`:"已顯示全部"}
 function renderSel(){
   const a=chosen();$("#sel").innerHTML=a.length?a.map((x,i)=>`<div class="sr"><span title="${esc(x.en)}">${i+1}. ${esc(x.en)}</span><button data-mv="${esc(x.id)}" data-d="-1" ${i?"":"disabled"}>↑</button><button data-mv="${esc(x.id)}" data-d="1" ${i<a.length-1?"":"disabled"}>↓</button><button data-un="${esc(x.id)}">×</button></div>`).join(""):'<p class="hint">尚未選取例句。</p>'}
 function stats(){
   const a=chosen(),w=a.reduce((s,x)=>s+words(x.en),0);$("#sSel").textContent=a.length;$("#sW").textContent=w;$("#sC").textContent=w*num(cfg.copies,3,1,20)}
-const refresh=()=>{renderList();renderSel();stats();sched()};
+const refresh=()=>{renderList();renderSel();stats();learningStats();sched()};
 /* 格線與分頁 */
 const units=s=>{let n=0;for(const c of s)n+=/[MW@%]/.test(c)?1.35:/[A-Z]/.test(c)?1.13:/[ilIjtfr.,:;!'`]/.test(c)?.54:/\s/.test(c)?.58:1;return n};
 const rowsOf=x=>Math.max(1,Math.ceil(units(x.en)*num(cfg.gridMm,5,3,9)/171));
@@ -206,81 +388,110 @@ const over=p=>p.main.scrollHeight>p.main.clientHeight+1;
 function paginate(){
   raf=null;$("#pages").replaceChildren();pages=[];let cur=mk();const a=chosen(),C=num(cfg.copies,3,1,20);
   if(!a.length)cur.main.innerHTML='<div class="empty">尚未選取例句<p style="font-size:10pt">請從左側挑選，或按「智慧組卷」。</p></div>';
-  for(const x of a){let done=0,g=0;
-    while(done<C&&g++<400){
-      const b=block(x,done>0);cur.main.appendChild(b);
-      if(over(cur)&&cur.main.children.length>1){b.remove();cur=mk();continue}
-      let add=0;for(let r=done+1;r<=C;r++){const w=writing(x,r);b.appendChild(w);if(over(cur)){w.remove();break}add++}
-      if(!add){if(cur.main.children.length>1){b.remove();cur=mk();continue}b.appendChild(writing(x,done+1));add=1;toast("有例句超出單頁，請調小行高或字寬。")}
-      done+=add;if(done<C)cur=mk()}}
-  scale();let u=0,t=0;pages.forEach(p=>{t+=p.main.clientHeight;if(a.length)u+=Math.min(p.main.scrollHeight,p.main.clientHeight)});
+  for(const x of a){
+    let card=block(x,false);cur.main.appendChild(card);
+    if(over(cur)&&cur.main.children.length>1){card.remove();cur=mk();card=block(x,false);cur.main.appendChild(card)}
+    for(let copy=1;copy<=C;copy++){
+      let lines=writing(x,copy),rows=[...lines.children];lines.replaceChildren();card.appendChild(lines);
+      for(const row of rows){
+        lines.appendChild(row);
+        if(over(cur)){
+          row.remove();
+          if(!lines.children.length)lines.remove();
+          if(!card.querySelector('.row'))card.remove();
+          cur=mk();card=block(x,true);cur.main.appendChild(card);
+          lines=document.createElement('div');lines.className='rs';card.appendChild(lines);lines.appendChild(row);
+          if(over(cur))toast('題目標題或內容過長，請調小字級。');
+        }
+      }
+    }
+  }
+  scale();let u=0,t=0;pages.forEach(p=>{t+=p.main.clientHeight;if(a.length){const last=p.main.lastElementChild;u+=last?Math.min(last.offsetTop+last.offsetHeight-p.main.offsetTop,p.main.clientHeight):0}});
   $("#sPg").textContent=pages.length;$("#sF").textContent=t?Math.round(100*u/t)+"%":"0%";
   $("#lay").textContent=`${pages.length} 張 A4｜每句 ${C} 次｜${{four:"英文四線格",line:"橫線",box:"方格"}[cfg.gridType]}`+(a.length&&pages.length>num(cfg.pageCap,2,1,15)?"｜已超過設定頁數":"")}
 function scale(){
   const s=Math.min(1,Math.max(240,$(".prev").clientWidth-40)/(210*96/25.4));
   document.querySelectorAll(".pw").forEach(w=>{w.style.width=210*s+"mm";w.style.height=297*s+"mm";w.firstChild.style.transform=`scale(${s})`})}
 function sched(){if(raf!==null)cancelAnimationFrame(raf);raf=requestAnimationFrame(paginate)}
-/* 智慧組卷 v2：策略排序 → 主題／句型限量＋避免重複詞組 → 0/1 背包 DP 湊近目標詞數 → 由易到難排列 */
+/* Bounded, weighted selection with review priority and diversity. */
 function smart(rand){
-  const T=num(cfg.targetWords,160,10,5000),C=num(cfg.copies,3,1,20),L=num(cfg.maxItems,12,1,100),R=Math.random;
-  const all=filtered();if(!all.length)return toast("目前篩選沒有可用例句。");
-  const h=x=>U.hist[x.id]||0;
-  const K=rand?()=>R():{bal:x=>h(x)*2+R()*2,new:x=>(h(x)?9:0)+R(),hard:x=>(x.level<3?9:0)+h(x)+R(),rev:x=>(h(x)?0:9)+R()}[cfg.mode]||(()=>R());
-  const ranked=all.map(x=>[K(x),x]).sort((a,b)=>a[0]-b[0]).map(p=>p[1]);
-  const nt=new Set(all.map(x=>x.topic)).size,nk=new Set(all.map(x=>x.kind)).size;
-  const cT=Math.max(2,Math.ceil(L/nt)+1),cK=Math.max(2,Math.ceil(L/nk)+1),need=Math.max(60,L*4),ct={},ck={},used=new Set(),inC=new Set(),c=[];
-  for(const strict of [1,0])for(const x of ranked){
-    if(c.length>=need)break;if(inC.has(x.id))continue;
-    const a=x.sg>=0?x.topic+"g"+x.sg:"",b=x.sr>=0?x.topic+"r"+x.sr:"";
-    if((ct[x.topic]||0)>=cT||(ck[x.kind]||0)>=cK||(strict&&((a&&used.has(a))||(b&&used.has(b)))))continue;
-    ct[x.topic]=(ct[x.topic]||0)+1;ck[x.kind]=(ck[x.kind]||0)+1;if(a)used.add(a);if(b)used.add(b);inC.add(x.id);c.push(x)}
-  const cap=Math.ceil(T*1.2)+5,n=c.length,wt=c.map(x=>words(x.en)*C),mc=new Int32Array(cap+1).fill(1e9),tk=new Uint8Array(n*(cap+1));mc[0]=0;
-  for(let i=0;i<n;i++)for(let w=cap;w>=wt[i];w--){const v=mc[w-wt[i]]+1;if(v<mc[w]&&v<=L){mc[w]=v;tk[i*(cap+1)+w]=1}}
-  let bw=0,bd=1e9;for(let w=1;w<=cap;w++)if(mc[w]<1e9){const d=Math.abs(w-T);if(d<=bd){bd=d;bw=w}}
-  if(!bw)return toast("條件過嚴，請調整詞數或句數。");
-  const out=[];for(let i=n-1,w=bw;i>=0;i--)if(tk[i*(cap+1)+w]){out.push(c[i]);w-=wt[i]}
-  out.sort((a,b)=>a.level-b.level||words(a.en)-words(b.en));U.selected=out.map(x=>x.id);paginate();
-  const P=num(cfg.pageCap,2,1,15);while(pages.length>P&&U.selected.length>1){U.selected.pop();paginate()}
-  save();refresh();toast(`已挑選 ${U.selected.length} 句（約 ${U.selected.reduce((s,i)=>s+words(item(i).en),0)*C} 詞），由易到難排列。`)}
+ const all=filtered(),C=cfg.copies,T=cfg.targetWords;
+ const out=Core.select(all,{mode:rand?'random':cfg.mode,target:T,copies:C,limit:cfg.maxItems,hist:U.hist,reviews:U.reviews});
+ if(!out.length)return toast('沒有符合策略的例句，請調整篩選、目標詞數或複習策略。');
+ U.selected=out.map(x=>x.id);paginate();
+ while(pages.length>cfg.pageCap&&U.selected.length>1){U.selected.pop();paginate()}
+ const total=chosen().reduce((n,x)=>n+words(x.en)*C,0),due=chosen().filter(x=>U.reviews[x.id]?.due<=Date.now()).length;
+ $('#planInfo').textContent=`已選 ${U.selected.length} 句／${total} 詞（目標 ${T}）· ${new Set(chosen().map(x=>x.topic)).size} 個主題 · ${due} 句到期複習。${pages.length>cfg.pageCap?'單句已超出頁數上限，請減少抄寫次數或調整版面。':total<T?'受句長、句數或頁數限制，未滿目標詞數。':''}`;
+ save();refresh();toast('組卷完成，已套用目前搜尋條件與學習策略。');
+}
 /* 新增、匯入匯出 */
 const uid=()=>"u-"+(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2));
 function addEntries(arr){
   const seen=new Set(bank.map(x=>norm(x.en)));let n=0;
-  for(const x of arr.slice(0,3000)){if(!valid(x)||seen.has(norm(x.en)))continue;seen.add(norm(x.en));U.custom.push(clean(x,uid()));n++}return n}
+  for(const x of arr.slice(0,3000)){if(U.custom.length>=3000)break;if(!valid(x)||seen.has(norm(x.en)))continue;seen.add(norm(x.en));U.custom.push(clean(x,uid()));n++}return n}
 async function importFile(f){
-  if(!f)return;
-  try{if(f.size>6e6)throw Error("檔案超過 6 MB");const d=JSON.parse(await f.text());
-    const arr=Array.isArray(d)?d:[...(d.custom||[]),...(d.completeBank||[])];
-    if(!arr.length)throw Error("找不到可匯入的例句");
-    const n=addEntries(arr);save();rebuild();refresh();toast(`已合併 ${n} 句（重複者略過）。`)}
-  catch(e){toast("匯入失敗："+e.message)}finally{$("#file").value=""}}
+ if(!f)return;
+ try{
+  if(f.size>6e6)throw Error('檔案超過 6 MB');
+  const d=JSON.parse(await f.text());
+  if(d?.app==='GSAT Writing Studio'){
+   if(!Array.isArray(d.custom)||!Array.isArray(d.selected)||!Array.isArray(d.hidden)||!d.config||typeof d.config!=='object')throw Error('備份格式不完整');
+   if(d.version>6)throw Error('此備份來自更新版本，請先更新程式');
+   if(!d.custom.every(x=>valid(x)&&typeof x.id==='string'))throw Error('備份含無效例句');
+   if(d.custom.length>3000)throw Error('自編例句超過 3000 句上限');
+   const ids=new Set(BUILT.map(x=>x.id));
+   for(const x of d.custom){if(ids.has(x.id))throw Error('備份例句 ID 重複');ids.add(x.id)}
+   if(!confirm('還原備份將取代目前的自編句、選句、收藏、設定與學習紀錄。建議先備份目前資料。是否繼續？'))return;
+   const counts={};for(const [id,n] of Object.entries(d.hist||{}))if(ids.has(id)&&Number.isInteger(n)&&n>=0&&n<=1e7)Object.defineProperty(counts,id,{value:n,enumerable:true,writable:true,configurable:true});
+   U={custom:d.custom.map(x=>clean(x,x.id)),selected:d.selected.filter(x=>ids.has(x)),hidden:d.hidden.filter(x=>ids.has(x)),hist:counts,reviews:Core.cleanReviews(d.reviews),favorites:Array.isArray(d.favorites)?[...new Set(d.favorites.filter(x=>ids.has(x)))]:[],config:cfg};
+   Object.assign(cfg,sanitizeConfig(d.config));applyCfg();
+   save();rebuild();refresh();toast('已還原備份：包含選句、設定與學習紀錄。');
+  }else{
+   const arr=Array.isArray(d)?d:d?.completeBank;
+   if(!Array.isArray(arr)||!arr.length)throw Error('請選擇完整備份或例句 JSON 陣列');
+   const n=addEntries(arr);save();rebuild();refresh();toast(`已合併 ${n} 句，重複或無效內容略過。`);
+  }
+ }catch(e){toast('匯入失敗：'+e.message)}finally{$('#file').value=''}
+}
 function download(){
-  const b=new Blob([JSON.stringify({app:"GSAT Writing Studio",version:3,...U,exportedAt:new Date().toISOString()},null,2)],{type:"application/json"});
+  const b=new Blob([JSON.stringify({app:"GSAT Writing Studio",version:6,...U,exportedAt:new Date().toISOString()},null,2)],{type:"application/json"});
   const u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download="學測英文罰寫備份.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000);toast("備份已建立。")}
-function printIt(){if(!chosen().length)return toast("請先挑選至少一句。");paginate();chosen().forEach(x=>U.hist[x.id]=(U.hist[x.id]||0)+1);save();renderList();window.print()}
+function printIt(){if(!chosen().length)return toast("請先挑選至少一句。");paginate();window.print()}
 const keys=["mode","targetWords","pageCap","maxItems","copies","gridType","gridMm","lineMm","fontSize","sheetTitle","school","student","showZh","showKey"];
 function applyCfg(){for(const k of keys){const e=$("#"+k);if(e.type==="checkbox")e.checked=!!cfg[k];else e.value=cfg[k]}}
 function toggle(id,on){const s=new Set(U.selected);on?s.add(id):s.delete(id);U.selected=[...s];save();refresh()}
 function init(){
   applyCfg();rebuild();
-  for(const k of keys)$("#"+k).addEventListener("change",e=>{const el=e.target;cfg[k]=el.type==="checkbox"?el.checked:el.type==="number"?num(el.value,DEF[k],+el.min||0,+el.max||1e9):el.value;save();stats();sched()});
+  for(const k of keys)$("#"+k).addEventListener("change",e=>{const el=e.target;cfg[k]=el.type==="checkbox"?el.checked:el.type==="number"?num(el.value,DEF[k],+el.min||0,+el.max||1e9):el.value;if(["targetWords","pageCap","maxItems","copies"].includes(k)){cfg[k]=Math.round(cfg[k]);el.value=cfg[k]}save();stats();sched()});
   $("#q").addEventListener("input",()=>{clearTimeout(qt);qt=setTimeout(()=>{limit=40;renderList()},120)});
-  for(const k of ["#fLv","#fYear","#fTp","#fKy"])$(k).addEventListener("change",()=>{limit=40;renderList()});
+  for(const k of ["#fLv","#fYear","#fTp","#fKy","#fSource","#fState"])$(k).addEventListener("change",()=>{limit=40;renderList()});
   $("#list").addEventListener("change",e=>{if(e.target.dataset.pick)toggle(e.target.dataset.pick,e.target.checked)});
-  $("#list").addEventListener("click",e=>{const id=e.target.dataset.hide;if(id&&confirm("確定隱藏這句？")){U.hidden.push(id);U.custom=U.custom.filter(x=>x.id!==id);save();rebuild();refresh()}});
+  $("#list").addEventListener("click",e=>{const favorite=e.target.dataset.fav;if(favorite){U.favorites=U.favorites.includes(favorite)?U.favorites.filter(x=>x!==favorite):[...U.favorites,favorite];save();renderList();learningStats();return}const id=e.target.dataset.hide;if(id&&confirm("確定隱藏這句？")){U.hidden.push(id);U.custom=U.custom.filter(x=>x.id!==id);save();rebuild();refresh()}});
   $("#sel").addEventListener("click",e=>{const d=e.target.dataset;if(d.un)toggle(d.un,false);if(d.mv){const i=U.selected.indexOf(d.mv),j=i+Number(d.d);if(i>=0&&j>=0&&j<U.selected.length){[U.selected[i],U.selected[j]]=[U.selected[j],U.selected[i]];save();refresh()}}});
-  $("#clrH").onclick=()=>{if(confirm("清除所有練習紀錄？")){U.hist={};save();refresh()}};$("#smart").onclick=()=>smart(false);$("#rnd").onclick=()=>smart(true);
+  $("#clrH").onclick=()=>{if(confirm("清除所有練習紀錄？")){U.hist={};U.reviews={};save();refresh()}};$("#smart").onclick=()=>smart(false);$("#rnd").onclick=()=>smart(true);
   $("#clr").onclick=()=>{U.selected=[];save();refresh()};
   $("#addAll").onclick=()=>{const f=filtered().slice(0,60);U.selected=[...new Set([...U.selected,...f.map(x=>x.id)])];save();refresh();toast(`已加入前 ${f.length} 句（單次上限 60 句）。`)};
   $("#more").onclick=()=>{limit+=40;renderList()};
   $("#newB").onclick=()=>{["eKy","eZh","eEn"].forEach(i=>$("#"+i).value="");$("#dlg").showModal()};
   $("#eNo").onclick=()=>$("#dlg").close();
   $("#eOk").onclick=()=>{const x={level:$("#eLv").value,topic:$("#eTp").value.trim()||"自編",kind:$("#eKy").value.trim()||"自編",zh:$("#eZh").value.trim(),en:$("#eEn").value.trim()};
-    if(!valid(x))return toast("請填入英文例句。");U.custom.push(clean(x,uid()));$("#dlg").close();save();rebuild();refresh();toast("已新增。")};
+    if(!valid(x))return toast("請填入英文例句。");if(U.custom.length>=3000)return toast("自編例句已達 3000 句上限。");if(bank.some(y=>norm(y.en)===norm(x.en)))return toast("句庫已有相同英文例句。");U.custom.push(clean(x,uid()));$("#dlg").close();save();rebuild();refresh();toast("已新增。")};
   $("#exp").onclick=download;$("#imp").onclick=()=>$("#file").click();$("#file").onchange=e=>importFile(e.target.files[0]);
-  $("#rst").onclick=()=>{if(!confirm("將清除本機新增、隱藏與設定，確定？"))return;try{localStorage.removeItem(KEY)}catch(e){}
-    U={custom:[],hidden:[],selected:[],hist:{},config:{...DEF}};Object.keys(cfg).forEach(k=>delete cfg[k]);Object.assign(cfg,DEF);U.config=cfg;applyCfg();rebuild();refresh()};
+  $("#rst").onclick=()=>{if(!confirm("將清除本機自編句、隱藏、選句、收藏、設定與所有學習紀錄，確定？"))return;try{localStorage.removeItem(KEY)}catch(e){}
+    U={custom:[],hidden:[],selected:[],hist:{},reviews:{},favorites:[],config:{...DEF}};Object.keys(cfg).forEach(k=>delete cfg[k]);Object.assign(cfg,DEF);U.config=cfg;applyCfg();rebuild();save();refresh()};
   $("#pr1").onclick=printIt;$("#pr2").onclick=printIt;addEventListener("resize",scale);
-  refresh();if(!U.selected.length)smart(false)}
+  $('#practice').onclick=startPractice;
+ $('#reveal').onclick=()=>{const x=practiceQueue[practiceIndex];$('#answer').textContent=x.en;$('#practiceNote').textContent=x.note||x.kind;$('#answer').hidden=false;$('#grades').hidden=false;$('#reveal').hidden=true};
+ $('#grades').onclick=e=>{const grade=e.target.dataset.grade;if(!grade)return;const x=practiceQueue[practiceIndex];U.reviews[x.id]=Core.review(U.reviews[x.id],grade);U.hist[x.id]=(Number(U.hist[x.id])||0)+1;save();practiceIndex++;showPractice();refresh()};
+ $('#practiceClose').onclick=()=>$('#practiceDialog').close();
+ refresh();if(!U.selected.length&&!hadSavedState)smart(false)}
+let practiceQueue=[],practiceIndex=0;
+function startPractice(){practiceQueue=chosen().slice();practiceIndex=0;if(!practiceQueue.length)return;$('#practiceDialog').showModal();showPractice();}
+function showPractice(){
+ if(practiceIndex>=practiceQueue.length){$('#practiceDialog').close();toast(`已完成 ${practiceQueue.length} 句自評，下次複習時間已更新。`);return;}
+ const x=practiceQueue[practiceIndex];$('#practiceProgress').textContent=`${practiceIndex+1} / ${practiceQueue.length} · 先試著說出或寫出英文，再查看參考句。`;
+ $('#prompt').textContent=x.zh;$('#answer').hidden=true;$('#grades').hidden=true;$('#reveal').hidden=false;$('#practiceNote').textContent='';$('#reveal').focus();
+}
 init();
+
 </script></body></html>

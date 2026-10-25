@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">
+<title>學測英文智慧學習工作室 v6</title>
+<style>
+[hidden]{display:none!important}
+.practicePrompt{font-size:19px;line-height:1.7}.practiceAnswer{font:20px/1.7 Georgia,serif;padding:15px;background:#eef4ff;border-radius:12px}details{margin:6px 0}summary{cursor:pointer;font-size:12px;color:var(--pri)}#practice{margin-top:10px;width:100%}#grades{margin:15px 0}button:focus-visible,summary:focus-visible{outline:3px solid #e0a52a;outline-offset:3px}
+:root{--ink:#17243b;--mut:#63728a;--line:#e0e7f0;--pri:#2959c8;--bg:#f1f5fb}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px system-ui,"Microsoft JhengHei",sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;border:1px solid #d5deec;background:#fff;border-radius:9px;padding:8px 12px;font-weight:650;color:var(--ink)}
+button:hover{background:#eef3fd}button:disabled{opacity:.4;cursor:not-allowed}
+.pri{background:var(--pri);color:#fff;border-color:var(--pri)}.pri:hover{background:#1c47ad}
+.ok{background:#137765;color:#fff;border-color:#137765}.ok:hover{background:#0c5d4e}.dg{color:#ad3030}
+.top{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 22px;color:#fff;background:linear-gradient(110deg,#1d3f9a,#2b6fd6);box-shadow:0 2px 10px #1d3f9a40}
+.top b{font-size:19px}.top small{display:block;opacity:.82;font-size:11px;margin-top:2px}.acts{display:flex;gap:8px;flex-wrap:wrap}
+.top button{background:#ffffff22;color:#fff;border-color:#ffffff55}.top button:hover{background:#ffffff40}.top .ok{background:#17b58f;border-color:#17b58f}
+.ws{display:grid;grid-template-columns:minmax(340px,420px) minmax(0,1fr);align-items:start}
+.side{padding:16px;display:flex;flex-direction:column;gap:13px;max-height:calc(100vh - 62px);overflow:auto;position:sticky;top:62px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px;box-shadow:0 3px 12px #2037590a}
+.panel h2{font-size:14px;margin:0 0 11px}
+.f{display:flex;flex-direction:column;gap:4px;margin-bottom:9px}label{font-size:12px;font-weight:650;color:#52617a}
+input,select,textarea{border:1px solid #d4ddec;border-radius:9px;padding:8px 9px;width:100%;min-width:0;background:#fff;color:var(--ink)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 3px #2959c820}
+input[type=checkbox]{width:16px;height:16px;accent-color:var(--pri)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:9px}.tb{display:flex;gap:6px;flex-wrap:wrap}.tb button{flex:1;font-size:12px;padding:7px}
+.ck{display:flex;gap:8px;align-items:center;margin:6px 0}.hint{font-size:11px;color:var(--mut);line-height:1.6;margin:6px 0 0}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.st{border:1px solid var(--line);border-radius:10px;background:#fafcff;text-align:center;padding:9px 4px}
+.st b{display:block;font-size:19px;color:var(--pri)}.st span{font-size:10px;color:var(--mut)}
+.list{max-height:380px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.it{display:flex;gap:8px;padding:10px;border-bottom:1px solid #edf0f5}.it:last-child{border:0}.it:hover{background:#f9fbff}.it.on{background:#eef4ff}
+.it .b{flex:1;min-width:0}.t{font-size:12.5px;font-weight:750;color:#243b64}.en{font:12px/1.5 Georgia,serif;margin-top:4px}.zh{font-size:11px;color:var(--mut);margin-top:3px}
+.meta{font-size:10px;color:#6480a8;margin-top:4px}.pill{background:#ecf2fe;color:#315cc0;border-radius:6px;padding:1px 5px;font-size:10px}
+.mini{font-size:10px;padding:3px 7px;margin-top:5px}
+.sel{max-height:150px;overflow:auto}.sr{display:flex;gap:5px;align-items:center;padding:5px 0;border-bottom:1px solid #eef1f5;font-size:12px}
+.sr span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sr button{padding:2px 7px}
+.prev{padding:16px 20px 40px;min-width:0}.ph{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding-bottom:13px}
+.ph h2{margin:0;font-size:16px}.ph div div{font-size:12px;color:var(--mut)}
+#pages{display:flex;flex-direction:column;align-items:center;gap:20px}.pw{position:relative;flex:none}
+.paper{position:absolute;top:0;left:0;width:210mm;height:297mm;background:#fff;color:#151515;transform-origin:top left;box-shadow:0 5px 24px #1b305729;overflow:hidden;font-family:"Times New Roman",Georgia,serif}
+.pin{position:absolute;inset:0;padding:10mm 12mm 9mm;display:flex;flex-direction:column}
+.phd{flex:none;border-bottom:1.3px solid #222;padding-bottom:2.5mm;margin-bottom:3mm}
+.pt{font:800 16pt/1.5 "Microsoft JhengHei",sans-serif;text-align:center;overflow-wrap:anywhere}
+.ps{display:flex;justify-content:space-between;gap:4mm;font:9pt "Microsoft JhengHei",sans-serif;margin-top:2mm}
+.pm{flex:1 1 auto;min-height:0}.pf{flex:none;display:flex;justify-content:space-between;font:8pt "Microsoft JhengHei",sans-serif;color:#555;padding-top:2mm;border-top:1px solid #ddd}
+.card{margin-bottom:3.2mm}.cap{font:8pt "Microsoft JhengHei",sans-serif;color:#444;margin-bottom:1mm;display:flex;justify-content:space-between}
+.pe{font:650 var(--pf,12pt)/1.36 Georgia,"Times New Roman",serif;overflow-wrap:anywhere}.pz{font:8.5pt/1.4 "Microsoft JhengHei",sans-serif;color:#555;margin-top:.7mm}
+.rs{margin-top:1.3mm}.row{position:relative;height:var(--lh,9mm)}.row .c{position:absolute;left:0;top:1px;width:6mm;text-align:center;font:7pt Georgia,serif;color:#888}
+.row .w{position:absolute;inset:0 0 0 7mm;border-bottom:.45px solid #8e9aa9}
+.g4 .w:before,.g4 .w:after{content:"";position:absolute;left:0;right:0;border-top:.4px solid #bdc7d5}.g4 .w:before{top:25%}.g4 .w:after{top:62%;border-top-style:dashed}
+.gb .w{background-image:linear-gradient(to right,#b8c3d2 .4px,transparent .4px);background-size:var(--cw,6mm) 100%;border-top:.4px solid #b8c3d2}
+.empty{border:2px dashed #d4ddea;text-align:center;padding:20mm 6mm;font-family:"Microsoft JhengHei",sans-serif;color:#8490a0}
+dialog{border:1px solid var(--line);border-radius:15px;padding:20px;width:min(95vw,520px)}dialog::backdrop{background:#17233d88}dialog h2{margin:0 0 12px}
+.notice{position:fixed;z-index:60;bottom:20px;right:20px;background:#17243b;color:#fff;padding:11px 16px;border-radius:10px;max-width:min(420px,90vw);opacity:0;pointer-events:none;transition:opacity .2s}.notice.show{opacity:1}
+@media(max-width:800px){.ws{grid-template-columns:1fr}.side{max-height:none;position:static}.prev{padding:12px 6px 40px}}
+@page{size:A4;margin:0}
+@media print{html,body{margin:0!important;background:#fff!important}.top,.side,.ph,.notice,dialog{display:none!important}
+.ws,.prev{display:block!important;width:210mm!important;margin:0!important;padding:0!important}#pages{display:block!important;margin:0}
+.pw{display:block!important;width:210mm!important;height:297mm!important;break-after:page}.pw:last-child{break-after:auto}
+.paper{transform:none!important;box-shadow:none!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style></head><body>
+<header class="top"><div><b>學測英文 · 智慧學習工作室 v6</b><small>58,465 句練習庫｜考點解析 × 間隔複習 × A4 智慧組卷</small></div>
+<div class="acts"><button id="exp">備份</button><button id="imp">匯入</button><button class="ok" id="pr1">列印／存 PDF</button></div></header>
+<main class="ws"><aside class="side">
+<section class="panel"><h2>組卷統計</h2><div class="stats">
+<div class="st"><b id="sDb">0</b><span>句庫句數</span></div><div class="st"><b id="sSel">0</b><span>已選句數</span></div><div class="st"><b id="sPg">0</b><span>A4 頁數</span></div>
+<div class="st"><b id="sW">0</b><span>單次詞數</span></div><div class="st"><b id="sC">0</b><span>總抄寫詞數</span></div><div class="st"><b id="sF">0%</b><span>版面使用率</span></div></div></section>
+<section class="panel"><h2>智慧組卷</h2><div class="two">
+<div class="f"><label for="targetWords">目標抄寫詞數</label><input id="targetWords" type="number" min="10" max="5000"></div>
+<div class="f"><label for="pageCap">最多 A4 張數</label><input id="pageCap" type="number" min="1" max="15"></div>
+<div class="f"><label for="maxItems">最多句數</label><input id="maxItems" type="number" min="1" max="100"></div>
+<div class="f"><label for="copies">每句抄寫次數</label><input id="copies" type="number" min="1" max="20"></div></div>
+<div class="f"><label for="mode">組卷策略</label><select id="mode"><option value="bal">適性：到期、難句與新句</option><option value="due">只挑到期複習</option><option value="new">只挑未練習</option><option value="hard">挑戰進階（L3 優先）</option><option value="rev">複習已練習</option></select></div>
+<div class="tb"><button class="pri" id="smart">✦ 智慧組卷</button><button id="rnd">隨機組卷</button><button id="clr">清空</button><button id="clrH">清除紀錄</button></div>
+<p class="hint">依目前篩選、複習到期日與自評難度選句，兼顧主題／句型多樣性、詞數與頁數。列印不會增加練習紀錄。</p><p class="hint" id="planInfo" role="status"></p></section>
+<section class="panel"><h2>今日學習</h2><p id="learnStats" class="hint"></p><button class="pri" id="practice">開始練習已選例句</button><p class="hint">先看中文回想英文，再自行評估：不熟 10 分鐘後重練、吃力 1 天後複習、熟悉 3 天起逐次延長。紀錄僅存於此瀏覽器。</p></section>
+<section class="panel"><h2>句庫搜尋</h2>
+<div class="f"><label for="q">搜尋（英文／中文／句型／主題）</label><input id="q" placeholder='例如 "due to" -traffic／數位安全'></div>
+<div class="two"><div class="f"><label for="fLv">難度</label><select id="fLv"><option value="">全部</option><option value="2">L2 中階</option><option value="3">L3 進階</option></select></div><div class="f"><label for="fYear">歷屆年份</label><select id="fYear"><option value="">全部年份</option><option value="111">111學測</option><option value="112">112學測</option><option value="113">113學測</option><option value="114">114學測</option><option value="115">115學測</option></select></div>
+<div class="f"><label for="fTp">主題</label><select id="fTp"><option value="">全部</option></select></div>
+<div class="f" style="grid-column:1/3"><label for="fKy">句型</label><select id="fKy"><option value="">全部</option></select></div></div>
+<div class="two"><div class="f"><label for="fSource">例句來源</label><select id="fSource"><option value="">全部來源</option><option value="curated">考點原創（含解析）</option><option value="template">模板變體</option><option value="custom">我的自編</option></select></div><div class="f"><label for="fState">學習狀態</label><select id="fState"><option value="">全部狀態</option><option value="favorite">我的收藏</option><option value="due">到期複習</option><option value="weak">不熟／吃力</option><option value="new">尚未練習</option></select></div></div>
+<p class="hint">空格分隔多個關鍵字；用雙引號搜尋完整片語，用減號排除詞語。年份篩選僅列出考點原創例句。</p>
+<div class="tb"><button id="addAll">加入目前篩選</button><button id="newB">＋ 新增例句</button></div>
+<p class="hint" id="sum"></p><div class="list" id="list"></div><div style="text-align:center;margin-top:8px"><button id="more">顯示更多</button></div></section>
+<section class="panel"><h2>已選例句（可調順序）</h2><div class="sel" id="sel"></div></section>
+<section class="panel"><h2>版面設定</h2><div class="f"><label for="sheetTitle">卷面標題</label><input id="sheetTitle"></div>
+<div class="two"><div class="f"><label for="school">班級</label><input id="school"></div><div class="f"><label for="student">姓名</label><input id="student"></div>
+<div class="f"><label for="gridType">格線</label><select id="gridType"><option value="four">英文四線格</option><option value="line">橫線</option><option value="box">方格</option></select></div>
+<div class="f"><label for="fontSize">題目字級 pt</label><input id="fontSize" type="number" min="9" max="17" step=".5"></div>
+<div class="f"><label for="lineMm">行高 mm</label><input id="lineMm" type="number" min="6" max="14" step=".5"></div>
+<div class="f"><label for="gridMm">字寬 mm</label><input id="gridMm" type="number" min="3" max="9" step=".5"></div></div>
+<div class="ck"><input type="checkbox" id="showZh"><label for="showZh">印出中文</label></div><div class="ck"><input type="checkbox" id="showKey"><label for="showKey">印出句型標籤</label></div>
+<p class="hint">58,368 句模板變體＋97 句考點原創（40 句新增用法提醒）。模板組合用於句型練習；考點例句並非官方考題原文。114 年資料沿用舊版，本次核對 111、112、113、115 年。完整備份可還原學習進度；例句陣列可合併匯入。</p>
+<button class="dg" id="rst">還原預設</button></section></aside>
+<section class="prev"><div class="ph"><div><h2>A4 即時預覽</h2><div id="lay"></div></div><button class="ok" id="pr2">列印目前試卷</button></div><div id="pages"></div></section></main>
+<dialog id="dlg"><h2>新增原創例句</h2><div class="two"><div class="f"><label for="eLv">難度</label><select id="eLv"><option value="2">L2</option><option value="3">L3</option></select></div>
+<div class="f"><label for="eTp">主題</label><input id="eTp" value="自編" maxlength="30"></div></div>
+<div class="f"><label for="eKy">句型／片語</label><input id="eKy" maxlength="150"></div><div class="f"><label for="eZh">中文意思</label><input id="eZh" maxlength="200"></div>
+<div class="f"><label for="eEn">英文例句</label><textarea id="eEn" rows="3" maxlength="500"></textarea></div>
+<div class="tb" style="justify-content:flex-end"><button id="eNo">取消</button><button class="pri" id="eOk">儲存</button></div></dialog>
+<dialog id="practiceDialog" aria-labelledby="practiceHeading"><h2 id="practiceHeading">主動回想練習</h2><p id="practiceProgress" class="hint"></p><p id="prompt" class="practicePrompt"></p><p id="answer" class="practiceAnswer" lang="en" hidden></p><p id="practiceNote" class="hint"></p><button class="pri" id="reveal">顯示參考英文</button><div class="tb" id="grades" hidden><button data-grade="again">不熟 · 10 分鐘</button><button data-grade="hard">吃力 · 1 天</button><button data-grade="good">熟悉 · 延後複習</button></div><button class="mini" id="practiceClose">結束練習</button></dialog>
+<input id="file" type="file" accept=".json,application/json" hidden><div class="notice" id="note" role="status" aria-live="polite"></div>
+<!-- DATA -->
+<!-- APP --></body></html>
