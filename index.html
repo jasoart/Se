@@ -198,7 +198,7 @@ function mk(){
   wrap.appendChild(p);$("#pages").appendChild(wrap);const o={main:p.querySelector(".pm")};pages.push(o);return o}
 function block(x,cont){
   const b=document.createElement("section"),i=U.selected.indexOf(x.id)+1;b.className="card";
-  b.innerHTML=`<div class="cap"><span>${i}. ${cont?"續寫・":""}${cfg.showKey?esc(x.kind):"英文佳句"}</span><span>${words(x.en)} words・L${x.level}</span></div><div class="pe">${esc(x.en)}</div>${cfg.showZh?`<div class="pz">${esc(x.zh)}</div>`:""}`;return b}
+  b.innerHTML=`<div class="cap"><span>${i}. ${cont?"續寫・":""}${cfg.showKey?esc(x.kind):"英文佳句"}</span><span>${words(x.en)} words・L${x.level}${x.year?`・${esc(x.year)}學測第${esc(x.question)}題`:""}</span></div><div class="pe">${esc(x.en)}</div>${cfg.showZh?`<div class="pz">${esc(x.zh)}</div>`:""}`;return b}
 function writing(x,r){
   const d=document.createElement("div");d.className="rs";const t=cfg.gridType==="box"?"gb":cfg.gridType==="four"?"g4":"";
   for(let j=0;j<rowsOf(x);j++){const w=document.createElement("div");w.className="row "+t;w.style.setProperty("--lh",num(cfg.lineMm,9,6,14)+"mm");w.style.setProperty("--cw",num(cfg.gridMm,5,3,9)+"mm");w.innerHTML=`<span class="c">${j?"":r}</span><span class="w"></span>`;d.appendChild(w)}return d}
